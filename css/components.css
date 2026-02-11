@@ -13,10 +13,10 @@ table {
     table-layout: fixed;
 }
 th, td {
-    padding: 4px 2px; /* 上下距離縮小，讓表格變矮 */
+    padding: 10px 4px;
     text-align: center;
     border-bottom: 1px solid #eee;
-    font-size: 0.8rem; /* 字體也可以稍微縮小 */
+    font-size: 0.85rem;
     word-break: break-all;
 }
 th {
@@ -224,7 +224,7 @@ tr:last-child td {
         color: var(--primary);
         font-weight: bold;
     }
-    
+
     .btn-logout {
         color: #e74c3c;
     }
@@ -276,6 +276,7 @@ tr:last-child td {
 .weekly-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
 }
 
 .weekly-table th {
