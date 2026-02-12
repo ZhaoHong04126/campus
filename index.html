@@ -93,6 +93,10 @@
 						<div class="app-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"> 💯 </div>
 						<div class="app-label">成績管理</div>
 					</div>
+					<div class="app-item" onclick="switchTab('homework')">
+						<div class="app-icon" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);"> 🎒 </div>
+						<div class="app-label">作業成績</div>
+					</div>
 					<div class="app-item" onclick="switchTab('accounting')">
 						<div class="app-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"> 💰 </div>
 						<div class="app-label">學期記帳</div>
@@ -363,6 +367,16 @@
 					</div>
 				</div>
 			</div>
+			<div id="view-homework" style="display: none;">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 style="margin:0; border:none;">🎒 作業成績</h2>
+                        <div id="homework-summary" style="font-size: 0.85rem; color: #666;">載入中...</div>
+                    </div>
+                    <div id="homework-list" style="min-height: 200px;"> </div>
+                    <button class="btn btn-add" onclick="openHomeworkModal()">+ 新增作業</button>
+                </div>
+            </div>
 			<div id="view-accounting" style="display: none;">
 				<div class="week-tabs" style="margin-bottom: 20px;">
 					<button class="tab-btn active" onclick="switchAccTab('summary')" id="btn-acc-summary">📊 摘要</button>
@@ -978,6 +992,41 @@
 			<button class="btn" style="width: 100%; margin-top: 10px; background: transparent; color: #666; border: 1px solid #ddd;" onclick="closeGradeModal()">關閉</button>
 		</div>
 	</div>
+	<div id="homework-modal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <h3 id="modal-hw-title" style="text-align: center; margin-top:0;">🎒 新增作業</h3>
+            <div class="input-group">
+                <label>科目</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="input-hw-subject-select" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                        <option value="" disabled selected>請選擇科目</option>
+                    </select>
+                    <input type="text" id="input-hw-subject-text" style="flex: 1; display: none;" placeholder="輸入科目名稱...">
+                    <button class="btn" id="btn-toggle-hw-input" onclick="toggleHomeworkSubjectMode()" style="width: auto; padding: 8px 12px; background: #666;" title="切換 自動/手寫">✏️</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>作業名稱</label>
+                <input type="text" id="input-hw-title" placeholder="例如：習題 1-1">
+            </div>
+            <div class="input-group">
+                <label>繳交日期</label>
+                <input type="date" id="input-hw-date">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>得分 (選填)</label>
+                    <input type="number" id="input-hw-score" placeholder="尚未批改">
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>滿分</label>
+                    <input type="number" id="input-hw-total" value="100">
+                </div>
+            </div>
+            <button id="btn-save-hw" class="btn" style="width: 100%; background: var(--primary);" onclick="addHomework()">+ 儲存</button>
+            <button class="btn" style="width: 100%; margin-top: 10px; background: transparent; color: #666; border: 1px solid #ddd;" onclick="closeHomeworkModal()">取消</button>
+        </div>
+    </div>
 	<div id="accounting-modal" class="modal">
 		<div class="modal-content" style="text-align: left;">
 			<h3 style="text-align: center; margin-top:0;">💰 新增收支紀錄</h3>
@@ -1113,6 +1162,7 @@
 	<script src="js/anniversary.js"></script>
 	<script src="js/learning.js"></script>
 	<script src="js/lottery.js"></script>
+	<script src="js/homework.js"></script>
 	<!-- <script>
 	  // 1. 檢查瀏覽器是否支援 Service Worker
 	  if ('serviceWorker' in navigator) {

@@ -138,6 +138,7 @@ function switchTab(tabName, addToHistory = true) {
         'grades', 'exams-hub', 'grade-manager', 
         'accounting', 'notes', 'anniversary', 
         'learning', 'lottery', 'notifications',
+        'homework',
     ];
     
     // 迴圈：隱藏所有 View，並移除導航列按鈕的 active 樣式
@@ -188,6 +189,7 @@ function switchTab(tabName, addToHistory = true) {
             case 'lottery': pageTitle = "幸運籤筒"; break;
             case 'learning': pageTitle = "學習進度"; break;
             case 'notifications': pageTitle = "通知中心"; break;
+            case 'homework': pageTitle = "作業管理"; break;
         }
         const titleEl = document.getElementById('app-title');
         if (titleEl) titleEl.innerText = pageTitle;
@@ -237,6 +239,10 @@ function switchTab(tabName, addToHistory = true) {
     // 如果切換到通知頁，渲染設定列表
     if (tabName === 'notifications') {
         if (typeof renderNotificationApp === 'function') renderNotificationApp();
+    }
+    // 如果切換到作業頁，渲染設定列表
+    if (tabName === 'homework') {
+        if (typeof renderHomework === 'function') renderHomework();
     }
 }
 

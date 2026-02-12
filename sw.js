@@ -30,6 +30,7 @@ const ASSETS_TO_CACHE = [
 	'./js/anniversary.js',
 	'./js/learning.js',
 	'./js/lottery.js',
+	'./js/homework.js',
 ];
 
 // 監聽 'install' 事件：當 Service Worker 第一次安裝時觸發

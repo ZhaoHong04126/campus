@@ -83,6 +83,11 @@ body[data-page="notifications"] {
     background: linear-gradient(to top, #dfe9f3 0%, white 100%);
 }
 
+/* 11. 作業 (Homework): 淡雅的粉紅色 */
+body[data-page="homework"] {
+    background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+
 body.dark-mode[data-page="home"] { background: #1a1a2e; } /* 深藍黑 */
 body.dark-mode[data-page="schedule"] { background: #162447; } /* 深海藍 */
 body.dark-mode[data-page="lottery"] { background: #2d1b36; } /* 深紫 */
@@ -92,6 +97,7 @@ body.dark-mode[data-page="accounting"] { background: #331e21; } /* 深紅褐 */
 body.dark-mode[data-page="notes"] { background: #222; } /* 深灰 */
 body.dark-mode[data-page="anniversary"] { background: #3a1c20; } /* 深玫瑰 */
 body.dark-mode[data-page="learning"] { background: #122c2a; } /* 深青 */
+body.dark-mode[data-page="homework"] { background: #1e272e; } /* 深灰藍 */
 body.dark-mode[data-page="settings"],
 body.dark-mode[data-page="info"] { background: #121212; } /* 純黑 */
 

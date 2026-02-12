@@ -25,6 +25,7 @@ let semesterStartDate = "";// 學期開始日
 let semesterEndDate = "";// 學期結束日
 let learningList = [];// 學習計畫資料
 let lotteryList = [];//籤筒資料
+let homeworkList = [];// 作業資料
 let graduationTarget = 128; // 畢業學分目標 (預設 128)
 // 預設的支付方式列表
 let paymentMethods = [

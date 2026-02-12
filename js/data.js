@@ -124,6 +124,7 @@ function saveData() {
         endDate: semesterEndDate,// 學期結束日期
         learning: learningList,// 學習進度計畫
         notificationSettings: notificationSettings,// 儲存通知設定
+        homework: homeworkList,// 存儲作業資料
     };
 
     // 準備要儲存的完整物件
@@ -192,6 +193,7 @@ function refreshUI() {
     if (typeof renderSemesterSettings === 'function') renderSemesterSettings();// 學期日期設定介面
     if (typeof renderLottery === 'function') renderLottery();// 重新渲染籤筒
     if (typeof renderNotificationApp === 'function') renderNotificationApp();// 如果有定義通知
+    if (typeof renderHomework === 'function') renderHomework();// 重新渲染作業列表
 
     // 更新頂部導航列的名稱
     const nameDisplay = document.getElementById('user-name-display');
@@ -220,7 +222,7 @@ function loadSemesterData(sem) {
         notes: [],// 空的筆記陣列
         startDate: "",// 學期開始日為空字串
         endDate: "",// 學期結束日為空字串
-
+        homework: [],// 空的作業陣列
     };
 
     // --- 將資料庫中的資料指派給全域操作變數 (State)，方便其他 js 存取與修改 ---
@@ -232,7 +234,8 @@ function loadSemesterData(sem) {
     accountingList = allData[sem].accounting || [];// 載入記帳資料，若無資料則給予空陣列 []
     quickNotes = allData[sem].notes || [];// 載入筆記資料，若無資料則給予空陣列 []
     anniversaryList = allData[sem].anniversaries || [];// 載入紀念日資料，若無資料則給予空陣列 []
-    
+    homeworkList = allData[sem].homework || [];// 載入作業資料，若無資料則給予空陣列 []
+
     // 載入學期開始與結束日期
     semesterStartDate = allData[sem].startDate || "";
     semesterEndDate = allData[sem].endDate || "";
