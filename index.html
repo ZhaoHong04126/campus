@@ -479,7 +479,7 @@
 			</div>
 			<div id="view-info" style="display: none;">
 				<div class="card">
-					<h2>🚀 校園王 App 功能總覽 (v6.2)</h2>
+					<h2>🚀 校園王 App 功能總覽 (v6.4)</h2>
 					<div style="background: #fff3e0; color: #e67e22; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 0.9rem; border-left: 4px solid #e67e22;">
 						<strong>💡 Web OS 架構：</strong><br>
 						本系統採用「類手機桌面」設計，所有功能皆獨立為 App，點擊圖示即可開啟，並支援深色模式切換。
@@ -524,6 +524,14 @@
 							</li>
 						</ul>
 					</div>
+					<div style="margin-bottom: 20px;">
+                        <h4 style="color: var(--primary); border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 10px;">🎒 作業成績</h4>
+                        <ul style="padding-left: 20px; color: var(--text-sub); font-size: 0.95rem; line-height: 1.6;">
+                            <li><strong>作業清單：</strong>條列式管理待繳作業與考試日期，支援一鍵標記「已完成/未完成」狀態。</li>
+                            <li><strong>智慧輸入：</strong>新增作業時，可透過按鈕切換「選單模式 (從課表選科目)」或「手寫模式 (自訂科目)」。</li>
+                            <li><strong>分數紀錄：</strong>支援記錄該次作業或小考的得分，方便追蹤平時成績狀況。</li>
+                        </ul>
+                    </div>
 					<div style="margin-bottom: 20px;">
 						<h4 style="color: var(--primary); border-bottom: 1px dashed #ddd; padding-bottom: 5px; margin-bottom: 10px;">💰 學期記帳</h4>
 						<ul style="padding-left: 20px; color: var(--text-sub); font-size: 0.95rem; line-height: 1.6;">
@@ -695,7 +703,7 @@
 			<div class="hero-content">
 				<h1 class="hero-title">校園生活，<br>一手掌握。</h1>
 				<p class="hero-subtitle">
-					從課表、成績到記帳，所有需求一次滿足。<br>
+					從課表、作業、成績到記帳，所有需求一次滿足。<br>
 					專為大學生設計的 Web OS 個人助理。
 				</p>
 				<button class="btn-cta large" onclick="openLoginModal()">🚀 免費開始使用</button>
@@ -711,7 +719,8 @@
 					<div class="floating-card c5">🎨 專屬主題</div>
 					<div class="floating-card c6">📚 讀書計畫</div>
 					<div class="floating-card c7">🎰 幸運籤筒</div>
-					<div class="floating-card c8">☁️ 雲端同步</div>
+					<div class="floating-card c8">🎒 作業成績</div>
+					<div class="floating-card" style="top: 88%; left: 82%; border-left: 5px solid #a18cd1; animation: float-circle 5s ease-in-out infinite; animation-delay: 1.5s;">☁️ 雲端同步</div>
 				</div>
 			</div>
 		</section>
@@ -735,6 +744,11 @@
 					<p>自動計算學分加權平均 (GPA)，視覺化追蹤畢業門檻達成率，讓學業進度一目了然。</p>
 				</div>
 				<div class="feature-card">
+					<div class="f-icon">🎒</div>
+					<h3>作業成績</h3>
+					<p>條列式管理待繳作業與考試日期，支援<strong>智慧輸入切換</strong> (選單/手寫) 與分數紀錄，不再錯過任何 Deadline。</p>
+				</div>
+				<div class="feature-card">
 					<div class="f-icon">💰</div>
 					<h3>學期記帳</h3>
 					<p>專屬學生的記帳工具，支援多帳戶管理 (如 LINE Pay) 與月報表分析，清楚掌握收支。</p>
@@ -756,9 +770,7 @@
 				</div>
 			</div>
 		</section>
-		<footer class="landing-footer">
-			© 2026 CampusKing Inc. Designed by Huang Zhaohong
-		</footer>
+		<footer class="landing-footer">© 2026 CampusKing Inc. Designed by Huang Zhaohong</footer>
 	</div>
 	<div id="login-overlay" style="display: none;">
 		<div class="login-card">
