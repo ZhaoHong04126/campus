@@ -17,11 +17,10 @@ function renderAccounting() {
     
     // 遍歷每一筆記帳資料來計算總收支
     accountingList.forEach(item => {
-    const amount = parseInt(item.amount);
-    if (item.type === 'income') totalIncome += amount;
-    else if (item.type === 'expense') totalExpense += amount;
-    // 總資產不變
-});
+        const amount = parseInt(item.amount);
+        if (item.type === 'income') totalIncome += amount;
+        else if (item.type === 'expense') totalExpense += amount;
+    });
 
     const summaryIncome = document.getElementById('acc-summary-income');// 取得顯示總收入的 DOM 元素
     const summaryExpense = document.getElementById('acc-summary-expense');// 取得顯示總支出的 DOM 元素
@@ -533,5 +532,4 @@ function toggleAccType() {
         if (methodLabel) methodLabel.innerText = "支付方式";
         document.getElementById('input-acc-title').placeholder = "例如：早餐、薪水";
     }
-
 }

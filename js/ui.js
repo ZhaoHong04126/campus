@@ -337,72 +337,36 @@ function initUI() {
 
 let isEditingCredits = false; // 紀錄是否處於編輯學分設定模式
 
-// 渲染學分設定介面 (區分檢視模式與編輯模式)
-function renderCreditSettings() {
-    const gradInput = document.getElementById('edit-grad-target');
-    const textGradTarget = document.getElementById('text-grad-target');
-    const viewUni = document.getElementById('view-settings-uni');
-    const editUni = document.getElementById('edit-settings-uni');
+
+// 新增分類的邏輯
+window.addNewCategory = function() {
+    const nameInput = document.getElementById('new-cat-name');
+    const typeInput = document.getElementById('new-cat-type');
+    const name = nameInput.value.trim();
     
-    if (!viewUni) return;
-    
-    if (gradInput) gradInput.value = graduationTarget;
-    if (textGradTarget) textGradTarget.innerText = graduationTarget;
-    
-    let viewHtml = '';
-    let editHtml = '';
-    
-    // 直接使用完整模組 (原大學模式)
-    viewUni.style.display = 'block';
-    editUni.style.display = 'block';
-    
-    const order = ["通識", "院共同", "基礎", "核心", "專業", "自由"];
-    order.forEach(cat => {
-        const target = categoryTargets[cat];
-        let targetText = typeof target === 'object' ? `必${target['必修']} / 選${target['選修']}` : `${target}`;
-        
-        viewHtml += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.95rem;">
-                <span style="color:var(--text-sub);">${cat}</span>
-                <span>${targetText}</span>
-            </div>`;
-        
-        editHtml += `<div style="margin-bottom: 12px;">
-                        <div style="font-weight: bold; color: var(--text-main); margin-bottom: 5px; font-size:0.9rem;">${cat}</div>
-                        <div style="display: flex; gap: 10px;">`;
-        
-        if (typeof target === 'object') {
-            editHtml += `
-                <div style="flex: 1;"><span style="font-size: 0.8rem;">必修</span><input type="number" id="input-${cat}-req" value="${target['必修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
-                <div style="flex: 1;"><span style="font-size: 0.8rem;">選修</span><input type="number" id="input-${cat}-ele" value="${target['選修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
-        } else {
-            editHtml += `<div style="flex: 1;"><input type="number" id="input-${cat}-total" value="${target||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
-        }
-        editHtml += `</div></div>`;
-    });
-    viewUni.innerHTML = viewHtml;
-    editUni.innerHTML = editHtml;
+    if (!name) { showAlert("請輸入分類名稱"); return; }
+    if (categoryTargets[name]) { showAlert("這個分類已經存在囉！"); return; }
+
+    // 根據類型初始化
+    if (typeInput.value === 'complex') {
+        categoryTargets[name] = { "必修": 0, "選修": 0 };
+    } else {
+        categoryTargets[name] = 0;
+    }
+
+    // 清空輸入並重新渲染編輯介面
+    nameInput.value = '';
+    renderCreditSettings(); 
 }
 
-// 切換學分設定的 檢視/編輯 模式
-function toggleCreditEdit() {
-    isEditingCredits = !isEditingCredits;
-    const viewDiv = document.getElementById('credits-view-mode');
-    const editDiv = document.getElementById('credits-edit-mode');
-    const btn = document.getElementById('btn-edit-credits');
-    
-    if (isEditingCredits) {
-        // 進入編輯模式：隱藏檢視、顯示編輯與儲存按鈕
-        viewDiv.style.display = 'none';
-        editDiv.style.display = 'block';
-        btn.style.display = 'none';
-    } else {
-        // 回到檢視模式
-        viewDiv.style.display = 'block';
-        editDiv.style.display = 'none';
-        btn.style.display = 'block';
-        renderCreditSettings(); // 重新渲染以顯示最新數值
+// 刪除分類的邏輯
+window.deleteCategory = function(name) {
+    if(confirm(`確定要刪除「${name}」分類嗎？\n(注意：這不會刪除已登記的成績，但在圖表中將會歸類到「其他」)`)) {
+        delete categoryTargets[name];
+        renderCreditSettings();
     }
 }
+
 
 // --- 深色模式 (Dark Mode) ---
 
@@ -513,37 +477,6 @@ function deleteAnnouncement(docId) {
         }
     });
 
-}
-
-// 儲存學分設定 (按下儲存按鈕時觸發)
-function saveCreditSettings() {
-    const gradInput = document.getElementById('edit-grad-target');
-    if (gradInput) {
-        graduationTarget = parseInt(gradInput.value) || 128;
-    }
-    
-    // 只保留完整模組的儲存邏輯
-    const order = ["通識", "院共同", "基礎", "核心", "專業", "自由"];
-    order.forEach(cat => {
-        const reqInput = document.getElementById(`input-${cat}-req`);
-        const eleInput = document.getElementById(`input-${cat}-ele`);
-        const totalInput = document.getElementById(`input-${cat}-total`);
-        
-        if (reqInput && eleInput) {
-            categoryTargets[cat] = {
-                "必修": parseInt(reqInput.value) || 0,
-                "選修": parseInt(eleInput.value) || 0
-            };
-        } else if (totalInput) {
-            categoryTargets[cat] = parseInt(totalInput.value) || 0;
-        }
-    });
-    
-    saveData();
-    renderCreditSettings();
-    if (typeof renderAnalysis === 'function') renderAnalysis();
-    showAlert("學分標準設定已儲存！", "成功");
-    toggleCreditEdit();
 }
 // 修改顯示名稱的功能
 function editUserTitle() {

@@ -46,9 +46,17 @@ function parseAndApplyData(parsed) {
     if (parsed.periodConfig) {
         periodConfig = parsed.periodConfig; // 課堂時間設定
     }
-    if (parsed.categoryTargets) {
-        categoryTargets = parsed.categoryTargets; // 學分分類目標
+    // 讀取學校資訊
+    if (parsed.userSchoolInfo) {
+        userSchoolInfo = parsed.userSchoolInfo;
     }
+    // 讀取學分分類 (如果沒有資料，就保持空物件，不要給預設值)
+    if (parsed.categoryTargets) {
+        categoryTargets = parsed.categoryTargets;
+    } else {
+        categoryTargets = {}; // 確保是空的
+    }
+
     if (parsed.notificationSettings) {
         notificationSettings = parsed.notificationSettings;// 讀取通知設定
     }
@@ -134,6 +142,7 @@ function saveData() {
         currentSemester: currentSemester,// 紀錄使用者目前停留在哪個學期
         graduationTarget: graduationTarget,// 畢業總學分目標 (全域設定)
         categoryTargets: categoryTargets,// 各領域/必選修學分目標 (全域設定)
+        userSchoolInfo: userSchoolInfo,// 加入學校校系
         periodConfig: periodConfig,// 課堂時間設定 (上課時長、起始時間)
         paymentMethods: paymentMethods,// 將支付方式列表加入存檔物件中
         userTitle: userTitle,
@@ -194,6 +203,8 @@ function refreshUI() {
     if (typeof renderLottery === 'function') renderLottery();// 重新渲染籤筒
     if (typeof renderNotificationApp === 'function') renderNotificationApp();// 如果有定義通知
     if (typeof renderHomework === 'function') renderHomework();// 重新渲染作業列表
+    // [新增] 確保成績輸入視窗的「分類下拉選單」是根據使用者的設定產生的
+    if (typeof updateGradeCategoryOptions === 'function') updateGradeCategoryOptions();
 
     // 更新頂部導航列的名稱
     const nameDisplay = document.getElementById('user-name-display');

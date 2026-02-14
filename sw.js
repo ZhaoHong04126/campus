@@ -1,5 +1,5 @@
 // 定義快取版本名稱，更新版本號可強迫瀏覽器更新快取
-const CACHE_NAME = 'CampusKing_v6.4_'; 
+const CACHE_NAME = 'CampusKing_v6.5_'; 
 
 // 定義需要被預先快取的靜態檔案列表
 const ASSETS_TO_CACHE = [
@@ -53,4 +53,3 @@ self.addEventListener('fetch', (e) => {
     );
 
 });
-

@@ -56,6 +56,7 @@
 			<img id="user-photo" src="" alt="User" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8);">
 		</div>
 	</nav>
+
 	<div class="dashboard-container" style="display: none;">
 		<main class="main-content">
 			<div id="view-home">
@@ -345,23 +346,68 @@
 				</div>
 				<div id="subview-grade-credits" style="display: none;">
 					<div class="card">
-						<h2>🎓 畢業學分與模組進度</h2>
-						<div id="credit-progress-container" style="margin-top: 10px;">
-							<h4 style="margin-bottom: 8px; display:flex; justify-content:space-between; font-size:1rem; color:#555;">
-								<span>畢業門檻達成率</span>
-								<span>
-									<span id="total-credits" style="color:var(--primary); font-weight:bold;">0</span> /
-									<span id="target-credits">128</span>
-								</span>
-							</h4>
-							<div style="background: #eee; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin-bottom: 5px;">
-								<div id="credit-progress-bar" style="background: var(--primary); width: 0%; height: 100%; transition: width 0.8s ease-in-out;"> </div>
+						<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+							<div>
+								<h2 style="margin: 0; border: none; padding: 0;">🎓 畢業進度</h2>
+								<div id="school-info-display" style="font-size: 0.9rem; color: var(--primary); margin-top: 4px; font-weight: bold;">
+									</div>
 							</div>
-							<p style="font-size: 0.85rem; color: #999; text-align: right; margin-bottom: 25px;">(目標可至「個人設定」頁面修改)</p>
+							<button id="btn-edit-credits" class="btn" style="background: #666; padding: 6px 12px; font-size: 0.85rem; width: auto;" onclick="toggleCreditEdit()"> ⚙️ 設定標準 </button>
+						</div>
+
+						<div id="credits-view-mode">
+							<div id="credit-progress-container" style="margin-bottom: 20px;">
+								<h4 style="margin-bottom: 8px; display:flex; justify-content:space-between; font-size:1rem; color:#555;">
+									<span>畢業門檻達成率</span>
+									<span>
+										<span id="total-credits" style="color:var(--primary); font-weight:bold;">0</span> /
+										<span id="text-grad-target">128</span>
+									</span>
+								</h4>
+								<div style="background: #eee; border-radius: 10px; height: 16px; width: 100%; overflow: hidden; margin-bottom: 5px;">
+									<div id="credit-progress-bar" style="background: var(--primary); width: 0%; height: 100%; transition: width 0.8s ease-in-out;"> </div>
+								</div>
+							</div>
+							
 							<hr style="border: 0; border-top: 1px dashed #ddd; margin-bottom: 20px;">
+							
 							<div id="panel-credits-uni" style="display: block;">
-								<h4 style="color: #666; font-size: 1rem; margin-bottom: 15px;">📊 各模組詳細狀態 (大學)</h4>
+								<h4 style="color: #666; font-size: 1rem; margin-bottom: 15px;">📊 各模組詳細狀態</h4>
 								<div id="list-credits-uni"></div>
+							</div>
+						</div>
+
+						<div id="credits-edit-mode" style="display: none;">
+							<div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbdefb;">
+								<label style="font-weight:bold; color:#1565c0; font-size:0.9rem;">🏫 學校與科系資料</label>
+								<div style="display:flex; gap:10px; margin-top:8px;">
+									<input type="text" id="input-school-name" placeholder="學校 (如: 台大)" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
+									<input type="text" id="input-dept-name" placeholder="科系 (如:資工系)" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
+								</div>
+								<div style="margin-top:10px;">
+									<label style="font-size:0.85rem; color:#555;">畢業總學分目標</label>
+									<input type="number" id="edit-grad-target" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+								</div>
+							</div>
+
+							<h5 style="margin: 0 0 10px 0; color: #666; border-left: 4px solid var(--primary); padding-left: 8px;">📚 學分模組管理</h5>
+							<div id="edit-settings-uni"></div>
+
+							<div style="margin-top: 20px; background:#f1f8e9; padding:15px; border-radius:8px; border:1px solid #c5e1a5;">
+								<div style="font-weight:bold; color:#33691e; margin-bottom:10px;">+ 新增學分模組</div>
+								<div style="display:flex; gap:10px; margin-bottom:10px;">
+									<input type="text" id="new-cat-name" placeholder="名稱 (如: 共同必修)" style="flex:2; padding:8px; border:1px solid #ddd; border-radius:4px;">
+									<select id="new-cat-type" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:4px;">
+										<option value="simple">單一學分</option>
+										<option value="complex">分必/選修</option>
+									</select>
+								</div>
+								<button onclick="addNewCategory()" class="btn" style="width:100%; background:#558b2f;">新增</button>
+							</div>
+
+							<div style="display: flex; gap: 10px; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
+								<button class="btn" onclick="saveCreditSettings()" style="flex: 2; background: var(--primary);">💾 儲存設定</button>
+								<button class="btn" onclick="toggleCreditEdit()" style="flex: 1; background: transparent; color: #888; border: 1px solid #ddd;">取消</button>
 							</div>
 						</div>
 					</div>
@@ -655,31 +701,6 @@
 					</div>
 				</div>
 				<div class="card">
-					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f4f7f6;">
-						<h2 style="margin: 0; border: none; padding: 0;">📏 學分標準設定</h2>
-						<button id="btn-edit-credits" class="btn" style="background: #666; padding: 6px 12px; font-size: 0.9rem; width: auto;" onclick="toggleCreditEdit()"> ✏️ 修改 </button>
-					</div>
-					<div id="credits-view-mode">
-						<div id="view-grad-target" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border);">
-							<span>🏁 畢業總學分</span>
-							<span id="text-grad-target" style="font-weight:bold; color:var(--primary);">128</span>
-						</div>
-						<div id="view-settings-uni" style="display: none;"></div>
-					</div>
-					<div id="credits-edit-mode" style="display: none;">
-						<div style="margin-bottom: 15px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
-							<label style="display:block; color:#555; font-weight:bold; font-size:0.9rem; margin-bottom:5px;">畢業總學分目標</label>
-							<input type="number" id="edit-grad-target" class="login-input" style="text-align:center; margin-bottom:0;">
-						</div>
-						<h5 style="margin: 15px 0 10px 0; color: #666; border-left: 4px solid var(--primary); padding-left: 8px;"> 詳細目標設定</h5>
-						<div id="edit-settings-uni" style="display: none;"></div>
-						<div style="display: flex; gap: 10px; margin-top: 20px;">
-							<button class="btn" onclick="saveCreditSettings()" style="flex: 2; background: var(--primary);">💾 儲存</button>
-							<button class="btn" onclick="toggleCreditEdit()" style="flex: 1; background: transparent; color: #888; border: 1px solid #ddd;">取消</button>
-						</div>
-					</div>
-				</div>
-				<div class="card">
 					<h2 style="color: var(--danger); border-bottom-color: #fff0f0;">🛡️ 帳號管理</h2>
 					<div class="settings-list">
 						<div class="settings-item" onclick="logout()" style="color: var(--danger);">
@@ -694,6 +715,7 @@
 			</div>
 		</main>
 	</div>
+
 	<div id="landing-page" style="display: none;">
 		<header class="landing-header">
 			<div class="landing-logo">📅 校園王 CampusKing</div>
@@ -795,6 +817,7 @@
 			<button class="btn-anon" onclick="loginAnonymously()">👻 匿名試用</button>
 		</div>
 	</div>
+
 	<div id="schedule-modal" class="modal">
 		<div class="modal-content" style="width: 95%; max-width: 800px; height: 90vh; overflow-y: auto;">
 			<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -824,13 +847,12 @@
 			<p style="text-align: center; color: #888; font-size: 0.9rem; margin-top: 10px;">點擊格子可編輯課程</p>
 		</div>
 	</div>
-
 	<div id="course-modal" class="modal">
 		<div class="modal-content" style="text-align: left;">
 			<h3 style="text-align: center; margin-top:0;">✏️ 編輯課程</h3>
 			<div id="current-course-list" style="margin-bottom: 20px; max-height: 150px; overflow-y: auto;"></div>
 			<hr style="border:0; border-top:1px dashed #ddd; margin: 15px 0;">
-			<h4 style="margin: 0 0 10px 0; color: var(--primary);">新增一堂課(至少輸入兩個)</h4>
+			<h4 style="margin: 0 0 10px 0; color: var(--primary);">新增一堂課(至少輸入科目與時間)</h4>
 			<div class="input-group">
 				<label>節次區間 (起始 - 結束)</label>
 				<div style="display: flex; gap: 10px; align-items: center;">
@@ -977,13 +999,7 @@
 				<label>課程歸類 & 修別</label>
 				<div style="display: flex; gap: 8px;">
 					<select id="input-grade-category" style="flex: 2; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-						<option value="通識">通識教育課程</option>
-						<option value="院共同">院共同課程</option>
-						<option value="基礎">基礎模組</option>
-						<option value="核心">核心模組</option>
-						<option value="專業">專業模組</option>
-						<option value="自由">自由選修</option>
-						<option value="其他">其他</option>
+						<option value="" disabled selected>載入中...</option>
 					</select>
 					<select id="input-grade-nature" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
 						<option value="必修">必修</option>
@@ -1175,7 +1191,7 @@
 	<script src="js/learning.js"></script>
 	<script src="js/lottery.js"></script>
 	<script src="js/homework.js"></script>
-	<<script>
+	<!-- <script>
 	  // 1. 檢查瀏覽器是否支援 Service Worker
 	  if ('serviceWorker' in navigator) {
 	    // 2. 等待頁面完全載入後再註冊 (為了不影響網頁初次渲染速度)
@@ -1192,8 +1208,7 @@
 	        });
 	    });
 	  }
-	</script>
+	</script> -->
 </body>
 
 </html>
-

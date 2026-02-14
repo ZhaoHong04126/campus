@@ -21,14 +21,9 @@ function switchSemester() {
     const newSemester = select.value;
     
     saveData(); // 1. 先存檔舊學期的資料 (此時變數還是舊的，這是為了保護舊資料)
-    
     currentSemester = newSemester; // 2. 更新全域學期變數為「新學期」
     loadSemesterData(currentSemester); // 3. 載入新學期資料到記憶體
-    
-    // =========== [新增這一行] ===========
-    saveData(); // 4. 再次存檔！這次是為了把「currentSemester」這個設定更新進資料庫
-    // ===================================
-
+    saveData(); // 4. 再次存檔！
     refreshUI(); // 5. 強制刷新畫面
 }
 

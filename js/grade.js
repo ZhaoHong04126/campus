@@ -220,9 +220,43 @@ function deleteGrade(i) {
     });
 }
 
+// 更新成績 Modal 中的「課程歸類」下拉選單
+function updateGradeCategoryOptions() {
+    const select = document.getElementById('input-grade-category');
+    if (!select) return;
+
+    const currentVal = select.value; // 暫存目前選的值
+    select.innerHTML = ''; // 清空選項
+
+    const categories = Object.keys(categoryTargets);
+    
+    if (categories.length === 0) {
+        select.innerHTML = '<option value="" disabled selected>請先至設定頁新增類別</option>';
+    } else {
+        categories.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.innerText = cat;
+            select.appendChild(opt);
+        });
+        // 額外加入「其他」作為備用
+        if (!categoryTargets['其他']) {
+             const opt = document.createElement('option');
+             opt.value = '其他';
+             opt.innerText = '其他';
+             select.appendChild(opt);
+        }
+    }
+    
+    // 嘗試選回原本的值
+    if (currentVal && (categories.includes(currentVal) || currentVal === '其他')) {
+        select.value = currentVal;
+    }
+}
 // 開啟成績管理 Modal
 function openGradeModal() {
     updateExamSubjectOptions();// 開啟前先更新科目選單
+    updateGradeCategoryOptions(); // 更新分類選單
     document.getElementById('grade-modal').style.display = 'flex';// 顯示 Modal
     // 確保學分輸入框顯示 (因為有些情境可能被隱藏)
     const g = document.getElementById('input-credit-group');
@@ -502,7 +536,8 @@ function renderAnalysis() {
     
     // 分類統計物件
     let categoryEarned = {};
-    const categories = ["通識", "院共同", "基礎", "核心", "專業", "自由", "其他"];
+    const categories = Object.keys(categoryTargets); // 改成讀取設定的 keys
+    if(!categories.includes('其他')) categories.push('其他'); // 確保有其他
     
     categories.forEach(cat => {
         categoryEarned[cat] = { total: 0, "必修": 0, "選修": 0, "必選修": 0 };
@@ -661,7 +696,11 @@ function renderCategoryBreakdown(earnedMap) {
     panelUni.style.display = 'block';
 
     let html = '';
-    const order = ["通識", "院共同", "基礎", "核心", "專業", "自由", "其他"];
+    const order = Object.keys(categoryTargets);
+    if (order.length === 0) {
+        listUni.innerHTML = '<p style="text-align:center; color:#999;">尚未設定學分模組，請至上方「設定標準」新增。</p>';
+        return;
+    }
     
     order.forEach(cat => {
         const data = earnedMap[cat] || { total: 0, "必修": 0, "選修": 0 };
@@ -768,14 +807,17 @@ function switchGradeTab(tabName) {
         renderMidtermExams();
     } else if (tabName === 'list') {
         loadGrades();
-    } else if (tabName === 'chart') {
-        // 延遲渲染以確保 Canvas 尺寸正確
-        setTimeout(() => {
-            if (typeof renderAnalysis === 'function') renderAnalysis();
-        }, 50);
-    } else if (tabName === 'credits') {
-        if (typeof renderAnalysis === 'function') renderAnalysis();
     }
+
+    if (tabName === 'credits'){
+        renderAnalysis();//選染進度條
+        renderCreditSettings();// 喧染學校資訊與設定數值
+    } else if (tabName === 'chart'){
+        setTimeout(() => {
+            if (typeof renderAnalysis === 'function') renderAnalysis(); 
+        }, 50 );
+    }
+
 }
 
 // 渲染「總覽」分頁的統計儀表板
@@ -824,4 +866,147 @@ function renderGradeDashboard() {
     if (elGpa) elGpa.innerText = avg;
     if (elCredits) elCredits.innerText = earnedCredits;
     if (elFailed) elFailed.innerText = failedCount;
+}
+
+// [新增] 渲染學分設定介面 (學校資訊 + 編輯列表)
+function renderCreditSettings() {
+    // 1. 更新顯示模式的學校資訊
+    const displayEl = document.getElementById('school-info-display');
+    if (displayEl) {
+        if (userSchoolInfo.school || userSchoolInfo.department) {
+            displayEl.innerHTML = `🏫 ${userSchoolInfo.school} ${userSchoolInfo.department}`;
+        } else {
+            displayEl.innerHTML = `(尚未設定學校科系)`;
+        }
+    }
+    
+    // 2. 更新編輯模式的輸入框
+    const schoolInput = document.getElementById('input-school-name');
+    const deptInput = document.getElementById('input-dept-name');
+    const gradInput = document.getElementById('edit-grad-target');
+    const textGradTarget = document.getElementById('text-grad-target');
+
+    if (schoolInput) schoolInput.value = userSchoolInfo.school || "";
+    if (deptInput) deptInput.value = userSchoolInfo.department || "";
+    if (gradInput) gradInput.value = graduationTarget;
+    if (textGradTarget) textGradTarget.innerText = graduationTarget;
+
+    // 3. 渲染編輯列表 (edit-settings-uni)
+    const editUni = document.getElementById('edit-settings-uni');
+    if (!editUni) return;
+
+    let editHtml = '';
+    const categories = Object.keys(categoryTargets);
+
+    if (categories.length === 0) {
+        editHtml = '<div style="color:#999; text-align:center; padding:10px;">目前沒有任何模組，請由下方新增。</div>';
+    } else {
+        categories.forEach(cat => {
+            const target = categoryTargets[cat];
+            editHtml += `
+            <div style="margin-top: 10px; background:#fafafa; padding:12px; border-radius:6px; border:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-weight:bold; color:#333;">${cat}</span>
+                    <button onclick="deleteCategory('${cat}')" style="background:#ffebee; color:#c62828; border:none; border-radius:4px; cursor:pointer; font-size:0.8rem; padding:4px 10px;">🗑️ 刪除</button>
+                </div>
+                <div style="display: flex; gap: 10px;">`;
+            
+            if (typeof target === 'object') {
+                // 複雜模式 (分必選修)
+                editHtml += `
+                    <div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">必修</span><input type="number" id="edit-cat-${cat}-req" value="${target['必修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
+                    <div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">選修</span><input type="number" id="edit-cat-${cat}-ele" value="${target['選修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
+            } else {
+                // 簡單模式 (單一數值)
+                editHtml += `<div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">目標學分</span><input type="number" id="edit-cat-${cat}-total" value="${target||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
+            }
+            editHtml += `</div></div>`;
+        });
+    }
+    editUni.innerHTML = editHtml;
+}
+
+// [新增] 切換學分 檢視/編輯 模式
+function toggleCreditEdit() {
+    const viewDiv = document.getElementById('credits-view-mode');
+    const editDiv = document.getElementById('credits-edit-mode');
+    const btn = document.getElementById('btn-edit-credits');
+    
+    // 判斷目前狀態 (若 editDiv 顯示中，代表要關閉編輯)
+    if (editDiv.style.display === 'block') {
+        viewDiv.style.display = 'block';
+        editDiv.style.display = 'none';
+        btn.style.display = 'block'; // 顯示設定按鈕
+        renderAnalysis(); // 刷新圖表與進度條
+    } else {
+        viewDiv.style.display = 'none';
+        editDiv.style.display = 'block';
+        btn.style.display = 'none'; // 隱藏設定按鈕
+        renderCreditSettings(); // 渲染編輯介面數值
+    }
+}
+
+// [新增] 新增分類邏輯
+window.addNewCategory = function() {
+    const nameInput = document.getElementById('new-cat-name');
+    const typeInput = document.getElementById('new-cat-type');
+    const name = nameInput.value.trim();
+    
+    if (!name) { showAlert("請輸入分類名稱"); return; }
+    if (categoryTargets[name]) { showAlert("這個分類已經存在囉！"); return; }
+
+    // 初始化
+    if (typeInput.value === 'complex') {
+        categoryTargets[name] = { "必修": 0, "選修": 0 };
+    } else {
+        categoryTargets[name] = 0;
+    }
+
+    nameInput.value = '';
+    renderCreditSettings(); // 重新渲染列表
+}
+
+// [新增] 刪除分類邏輯
+window.deleteCategory = function(name) {
+    if(confirm(`確定要刪除「${name}」分類嗎？\n(這不會刪除已登記的成績，但在統計時會被歸類到「其他」)`)) {
+        delete categoryTargets[name];
+        renderCreditSettings();
+    }
+}
+
+// [新增] 儲存學分設定
+function saveCreditSettings() {
+    // 1. 儲存學校資訊
+    const schoolInput = document.getElementById('input-school-name');
+    const deptInput = document.getElementById('input-dept-name');
+    if (schoolInput) userSchoolInfo.school = schoolInput.value.trim();
+    if (deptInput) userSchoolInfo.department = deptInput.value.trim();
+
+    // 2. 儲存畢業總目標
+    const gradInput = document.getElementById('edit-grad-target');
+    if (gradInput) graduationTarget = parseInt(gradInput.value) || 128;
+
+    // 3. 儲存各分類目標
+    const categories = Object.keys(categoryTargets);
+    categories.forEach(cat => {
+        const target = categoryTargets[cat];
+        if (typeof target === 'object') {
+            const req = document.getElementById(`edit-cat-${cat}-req`);
+            const ele = document.getElementById(`edit-cat-${cat}-ele`);
+            if (req && ele) {
+                categoryTargets[cat]['必修'] = parseInt(req.value) || 0;
+                categoryTargets[cat]['選修'] = parseInt(ele.value) || 0;
+            }
+        } else {
+            const total = document.getElementById(`edit-cat-${cat}-total`);
+            if (total) categoryTargets[cat] = parseInt(total.value) || 0;
+        }
+    });
+    
+    saveData(); // 存檔 (會觸發 refreshUI)
+    toggleCreditEdit(); // 切回檢視模式
+    showAlert("設定已更新！", "成功");
+    
+    // 更新成績輸入視窗的下拉選單
+    if (typeof updateGradeCategoryOptions === 'function') updateGradeCategoryOptions();
 }
