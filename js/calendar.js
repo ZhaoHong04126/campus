@@ -1,7 +1,29 @@
 // 用來記錄目前月曆顯示的日期
 let calCurrentDate = new Date();
-// [新增] 記錄目前正在編輯的活動索引 (-1 代表新增模式)
+// 記錄目前正在編輯的活動索引 (-1 代表新增模式)
 let editingCalendarIndex = -1;
+// 記錄行事曆是否處於編輯模式
+let isCalendarEditMode = false;
+
+// 切換行事曆編輯/唯讀模式的邏輯
+function toggleCalendarEditMode() {
+    isCalendarEditMode = !isCalendarEditMode;
+    const btn = document.getElementById('btn-toggle-cal-edit');
+    if (!btn) return;
+
+    if (isCalendarEditMode) {
+        btn.innerHTML = "✏️ 編輯模式";
+        btn.style.color = "var(--primary)";
+        btn.style.borderColor = "var(--primary)";
+        btn.style.background = "#e6f0ff";
+        if (window.showAlert) showAlert("已開啟編輯模式！\n現在可以點選「日期格子」或「活動標籤」來新增與修改了。");
+    } else {
+        btn.innerHTML = "🔒 唯讀模式";
+        btn.style.color = "#888";
+        btn.style.borderColor = "#ddd";
+        btn.style.background = "transparent";
+    }
+}
 
 // 主要渲染函式
 function renderCalendar() {
@@ -14,7 +36,6 @@ function renderCalendarList() {
     const listDiv = document.getElementById('calendar-list');
     if (!listDiv) return;
 
-    // 排序
     calendarEvents.sort((a, b) => {
         const dateA = new Date(a.date + (a.startTime ? 'T' + a.startTime : 'T00:00'));
         const dateB = new Date(b.date + (b.startTime ? 'T' + b.startTime : 'T00:00'));
@@ -44,7 +65,6 @@ function renderCalendarList() {
                 dateDisplay = `${s} ~ ${e}`;
             }
 
-            // [新增] 點擊列表項目也可以編輯
             html += `
             <div onclick="editCalendarEvent(event, ${index})" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; ${style}; cursor:pointer;">
                 <div style="text-align:left;">
@@ -72,7 +92,6 @@ function renderMonthGrid() {
     const year = calCurrentDate.getFullYear();
     const month = calCurrentDate.getMonth(); 
 
-    // 週次計算
     let weekInfoText = "";
     if (typeof semesterStartDate !== 'undefined' && semesterStartDate) {
         const start = new Date(semesterStartDate);
@@ -105,9 +124,6 @@ function renderMonthGrid() {
 
     const today = new Date();
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
-
-    // [關鍵] 為了讓編輯功能正常，我們需要追蹤每個活動在原始陣列中的索引
-    // 先建立一個帶有索引的暫存陣列
     const eventsWithIndex = calendarEvents.map((e, i) => ({ ...e, _originalIndex: i }));
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -118,7 +134,6 @@ function renderMonthGrid() {
         const dStr = d.toString().padStart(2, '0');
         const currentDateStr = `${year}-${mStr}-${dStr}`;
 
-        // 篩選當日活動
         const dayEvents = eventsWithIndex.filter(e => {
             const start = e.date; 
             const end = e.endDate || e.date;
@@ -139,11 +154,9 @@ function renderMonthGrid() {
                 style = "opacity: 0.7;"; 
             }
             
-            // [新增] 點擊活動標籤 -> 編輯 (stopPropagation 防止觸發格子的點擊)
             eventsHtml += `<div class="cal-event-text" style="${style}" onclick="editCalendarEvent(event, ${e._originalIndex})">${prefix}${e.title}</div>`;
         });
 
-        // [新增] 點擊格子 -> 新增活動 (傳入日期)
         html += `<div class="${className}" onclick="openCalendarModal('${currentDateStr}')">
                     <div class="cal-date-num">${d}</div>
                     <div class="cal-events-wrapper">${eventsHtml}</div>
@@ -153,7 +166,6 @@ function renderMonthGrid() {
 }
 
 // 3. 互動邏輯 (新增、編輯、刪除)
-
 function changeMonth(offset) {
     calCurrentDate.setMonth(calCurrentDate.getMonth() + offset);
     renderMonthGrid();
@@ -161,21 +173,21 @@ function changeMonth(offset) {
 
 // 開啟 Modal (新增模式或由日期點擊觸發)
 function openCalendarModal(dateStr = '') {
-    // 重置為新增模式
+    if (dateStr && !isCalendarEditMode) {
+        if (window.showAlert) showAlert("目前為「🔒 唯讀模式」\n若要點擊格子新增活動，請先點擊右上角的按鈕切換至編輯狀態。");
+        return;
+    }
+
     editingCalendarIndex = -1;
+
     document.getElementById('cal-modal-title').innerText = "📅 新增活動";
-    
-    // 更新按鈕狀態
     document.getElementById('btn-save-cal').innerText = "+ 加入";
     document.getElementById('btn-save-cal').style.background = "#333";
-    document.getElementById('btn-del-cal').style.display = 'none'; // 隱藏刪除鈕
-
-    // 重置欄位
+    document.getElementById('btn-del-cal').style.display = 'none';
     document.getElementById('calendar-modal').style.display = 'flex';
-    document.getElementById('input-cal-date').value = dateStr; // 自動填入點擊的日期
+    document.getElementById('input-cal-date').value = dateStr;
     document.getElementById('input-cal-end-date').value = ''; 
     document.getElementById('input-cal-title').value = '';
-    
     document.getElementById('input-cal-allday').checked = true;
     document.getElementById('input-cal-start').value = '';
     document.getElementById('input-cal-end').value = '';
@@ -184,26 +196,25 @@ function openCalendarModal(dateStr = '') {
 
 // 點擊活動 -> 進入編輯模式
 function editCalendarEvent(event, index) {
-    // 防止觸發底下的日期格子點擊事件
     if (event) event.stopPropagation();
+    if (!isCalendarEditMode) {
+        if (window.showAlert) showAlert("目前為「🔒 唯讀模式」\n若要修改活動，請先切換至編輯狀態。");
+        return;
+    }
 
     const item = calendarEvents[index];
     if (!item) return;
 
     editingCalendarIndex = index;
     
-    // 更新介面文字
     document.getElementById('cal-modal-title').innerText = "✏️ 編輯活動";
     document.getElementById('btn-save-cal').innerText = "💾 儲存修改";
-    document.getElementById('btn-save-cal').style.background = "#f39c12"; // 橘色
-    document.getElementById('btn-del-cal').style.display = 'block'; // 顯示刪除鈕
-
-    // 回填資料
+    document.getElementById('btn-save-cal').style.background = "#f39c12";
+    document.getElementById('btn-del-cal').style.display = 'block';
     document.getElementById('calendar-modal').style.display = 'flex';
     document.getElementById('input-cal-date').value = item.date;
     document.getElementById('input-cal-end-date').value = item.endDate || '';
     document.getElementById('input-cal-title').value = item.title;
-    
     document.getElementById('input-cal-allday').checked = item.isAllDay;
     document.getElementById('input-cal-start').value = item.startTime || '';
     document.getElementById('input-cal-end').value = item.endTime || '';
@@ -250,11 +261,9 @@ function addCalendarEvent() {
         };
 
         if (editingCalendarIndex > -1) {
-            // 編輯模式
             calendarEvents[editingCalendarIndex] = eventData;
             showAlert("活動已更新！", "完成");
         } else {
-            // 新增模式
             calendarEvents.push(eventData);
             showAlert("活動已新增！", "成功");
         }
@@ -284,6 +293,11 @@ function deleteCalendarEventFromModal() {
 
 // 從列表中刪除 (保持舊有功能)
 function deleteCalendarEvent(index) {
+    if (!isCalendarEditMode) {
+        if (window.showAlert) showAlert("目前為「🔒 唯讀模式」\n若要刪除活動，請先切換至編輯狀態。");
+        return;
+    }
+    
     const doDelete = () => {
         calendarEvents.splice(index, 1);
         saveData();

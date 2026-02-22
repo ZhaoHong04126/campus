@@ -294,7 +294,6 @@ tr:last-child td {
     filter: brightness(0.95);
 }
 
-/* 分頁切換按鈕 (用於課表、成績、記帳) */
 .week-tabs {
     display: flex;
     justify-content: space-between;
@@ -322,7 +321,6 @@ tr:last-child td {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 狀態標籤 (用於記帳) */
 .badge-income {
     background-color: #e8f5e9;
     color: #2ecc71;
@@ -340,10 +338,9 @@ tr:last-child td {
     margin-right: 5px;
 }
 
-/* 課表格子互動樣式 */
 .cell-selected {
-    background-color: #b2dfdb !important; /* 青綠色高亮 */
-    border: 2px solid #009688 !important; /* 深色邊框 */
+    background-color: #b2dfdb !important;
+    border: 2px solid #009688 !important;
     position: relative;
     box-shadow: inset 0 0 10px rgba(0, 150, 136, 0.3);
 }
@@ -351,7 +348,7 @@ tr:last-child td {
 #weekly-schedule-body td:hover {
     background-color: #fafafa;
 }
-/* 覆蓋掉 selected 的 hover */
+
 #weekly-schedule-body td.cell-selected:hover {
     background-color: #b2dfdb;
 }

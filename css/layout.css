@@ -50,6 +50,7 @@
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
@@ -108,17 +109,13 @@
     }
 }
 
-/* App Launcher 佈局 */
 #view-home {
     padding-top: 20px;
     min-height: 80vh;
-    /* background-image: url('image.png');
-    background-size: cover; */
 }
 
 .app-grid {
     display: grid;
-    /* 手機版一行 4 個，類似你的截圖 */
     grid-template-columns: repeat(4, 1fr); 
     gap: 20px 10px;
     padding: 10px;
@@ -131,17 +128,17 @@
     align-items: center;
     cursor: pointer;
     transition: transform 0.1s;
-    width: 70px; /* 限制點擊區域寬度 */
+    width: 70px;
 }
 
 .app-item:active {
-    transform: scale(0.9); /* 點擊時縮放效果 */
+    transform: scale(0.9);
 }
 
 .app-icon {
     width: 56px;
     height: 56px;
-    border-radius: 18px; /* 連續曲線圓角 (Squircle 風格) */
+    border-radius: 18px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -181,12 +178,12 @@
 }
 
 #nav-back-btn {
-    padding: 10px; /* 增加觸控範圍 */
+    padding: 10px;
     margin-right: 5px;
     transition: transform 0.2s;
 }
 
 #nav-back-btn:active {
-    transform: scale(0.8); /* 按下時縮小效果 */
+    transform: scale(0.8);
     opacity: 0.8;
 }

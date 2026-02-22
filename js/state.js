@@ -6,27 +6,26 @@ let isRegisterMode = false;
 let currentDay = new Date().getDay();
 if (currentDay === 0 || currentDay === 6) currentDay = 1;
 
-let currentSemester = "114-1";// 目前選擇的學期
+let currentSemester = "114-1";  // 目前選擇的學期
+let semesterList = ["114-1"];   // 學期列表
+let userTitle = "同學";         // 預設顯示名稱
+let allData = {};               // 儲存所有學期的完整資料結構
 
-let semesterList = ["114-1"];// 學期列表
-
-let userTitle = "同學"; // 預設顯示名稱
-let allData = {};// 儲存所有學期的完整資料結構
-let weeklySchedule = {};// 當前學期的週課表資料
-let gradeList = [];// 當前學期的成績資料
-let regularExams = {};// 當前學期的平常考資料
-let midtermExams = {};// 當前學期的段考資料
-let calendarEvents = [];// 當前學期的行事曆資料
-let accountingList = [];// 當前學期的記帳資料
-let accChartInstance = null;// 記帳圖表實例 (Chart.js)
-let quickNotes = [];// 筆記資料
-let anniversaryList = [];// 紀念日資料
-let semesterStartDate = "";// 學期開始日
-let semesterEndDate = "";// 學期結束日
-let learningList = [];// 學習計畫資料
-let lotteryList = [];//籤筒資料
-let homeworkList = [];// 作業資料
-let graduationTarget = 128; // 畢業學分目標 (預設 128)
+let weeklySchedule = {};        // 當前學期的週課表資料
+let regularExams = {};          // 當前學期的平常考資料
+let midtermExams = {};          // 當前學期的段考資料
+let gradeList = [];             // 當前學期的成績資料
+let calendarEvents = [];        // 當前學期的行事曆資料
+let accountingList = [];        // 當前學期的記帳資料
+let quickNotes = [];            // 筆記資料
+let anniversaryList = [];       // 紀念日資料
+let learningList = [];          // 學習計畫資料
+let lotteryList = [];           // 籤筒資料
+let homeworkList = [];          // 作業資料
+let semesterStartDate = "";     // 學期開始日
+let semesterEndDate = "";       // 學期結束日
+let accChartInstance = null;    // 記帳圖表實例 (Chart.js)
+let graduationTarget = 128;     // 畢業學分目標 (預設 128)
 // 預設的支付方式列表
 let paymentMethods = [
     "現金", "一卡通", "悠遊卡", 
@@ -39,15 +38,14 @@ let userSchoolInfo = {
     department: ""
 };
 
-// 模組類別初始化為空物件
-// 使用者需自行在設定頁面新增
+// 模組類別初始化為空物件，使用者需自行在設定頁面新增
 let categoryTargets = {};
 
 // 課堂時間設定預設值
 let periodConfig = {
-    classDur: 50, // 上課時間 (分)
-    breakDur: 10, // 下課時間 (分)
-    startHash: "08:10" // 第一節開始時間
+    classDur: 50,       // 上課時間 (分)
+    breakDur: 10,       // 下課時間 (分)
+    startHash: "08:10"  // 第一節開始時間
 };
 
 // 通知設定預設值

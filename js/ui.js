@@ -3,28 +3,19 @@
 // 全域函式：顯示自訂 Alert Modal
 // message: 提示訊息內容, title: 標題 (預設為 "💡 提示")
 window.showAlert = function(message, title = "💡 提示") {
-    // 回傳一個 Promise，讓呼叫端可以用 .then() 或 await 等待使用者關閉
     return new Promise((resolve) => {
-        // 取得 Modal 元素
         const modal = document.getElementById('custom-modal');
-        // 如果 HTML 中找不到 Modal 元素，則退回使用原生的 alert，並結束 Promise
         if(!modal) { alert(message); resolve(); return; }
         
-        // 設定標題與訊息內容
         document.getElementById('custom-modal-title').innerText = title;
         document.getElementById('custom-modal-message').innerText = message;
-        
-        // Alert 不需要輸入框，所以隱藏它
         document.getElementById('custom-modal-input-container').style.display = 'none';
         
-        // 設定按鈕區塊：只顯示一個「好，知道了」按鈕
         const actions = document.getElementById('custom-modal-actions');
         actions.innerHTML = `<button class="btn" onclick="closeCustomModal(true)" style="flex:1; max-width:120px;">好，知道了</button>`;
         
-        // 將 resolve 函式暫存到 window 物件上，以便 closeCustomModal 呼叫時能觸發
         window._customModalResolve = resolve;
         
-        // 顯示 Modal (使用 Flex 排版置中)
         modal.style.display = 'flex';
     });
 }
@@ -62,32 +53,25 @@ window.showConfirm = function(message, title = "❓ 確認") {
 window.showPrompt = function(message, defaultValue = "", title = "✏️ 輸入") {
     return new Promise((resolve) => {
         const modal = document.getElementById('custom-modal');
-        // 若無 Modal 元素，退回原生 prompt
         if(!modal) { resolve(prompt(message, defaultValue)); return; }
         
-        // 設定文字
         document.getElementById('custom-modal-title').innerText = title;
         document.getElementById('custom-modal-message').innerText = message;
         
-        // 顯示輸入框容器
         const inputContainer = document.getElementById('custom-modal-input-container');
         const input = document.getElementById('custom-modal-input');
         inputContainer.style.display = 'block';
         
-        // 設定預設值並自動聚焦
         input.value = defaultValue;
         input.focus();
         
-        // 設定按鈕區塊
         const actions = document.getElementById('custom-modal-actions');
         actions.innerHTML = `
             <button class="btn" onclick="closeCustomModal(null)" style="flex:1; background:#eee; color:#666;">取消</button>
             <button class="btn" onclick="closeCustomModal(document.getElementById('custom-modal-input').value)" style="flex:1;">確定</button>
         `;
         
-        // 暫存 resolve
         window._customModalResolve = resolve;
-        // 顯示 Modal
         modal.style.display = 'flex';
     });
 }
@@ -95,34 +79,28 @@ window.showPrompt = function(message, defaultValue = "", title = "✏️ 輸入"
 // 關閉自訂 Modal 並回傳 Promise 結果的通用函式
 window.closeCustomModal = function(result) {
     const modal = document.getElementById('custom-modal');
-    // 隱藏 Modal
     modal.style.display = 'none';
     
-    // 如果有暫存的 Promise resolve 函式，則執行它並傳回結果
     if (window._customModalResolve) {
         window._customModalResolve(result);
-        // 清除暫存
         window._customModalResolve = null;
     }
 }
 
 // --- 路由與導航控制 (Routing) ---
 
-// 監聽瀏覽器上一頁/下一頁事件 (History API popstate)
+// 監聽瀏覽器上一頁/下一頁事件
 window.addEventListener('popstate', (event) => {
-    // 取得歷史紀錄中的 view 狀態，若無則預設回首頁 ('home')
     const targetView = event.state ? event.state.view : 'home';
-    // 切換分頁，但不再次推入歷史紀錄 (false)，避免無限迴圈
     switchTab(targetView, false);
 });
 
 // 左上角返回按鈕的功能
 function goBack() {
-    // 如果有歷史紀錄且不是在首頁，就執行瀏覽器的「上一頁」
     if (window.history.state && window.history.state.view !== 'home') {
         window.history.back();
     } else {
-        switchTab('home');// 否則強制回到首頁
+        switchTab('home');
     }
 }
 
@@ -141,7 +119,6 @@ function switchTab(tabName, addToHistory = true) {
         'homework',
     ];
     
-    // 迴圈：隱藏所有 View，並移除導航列按鈕的 active 樣式
     views.forEach(view => {
         const el = document.getElementById('view-' + view);
         if (el) el.style.display = 'none';
@@ -150,32 +127,27 @@ function switchTab(tabName, addToHistory = true) {
         if (btn) btn.classList.remove('active');
     });
 
-    // 顯示目標 View
     const targetView = document.getElementById('view-' + tabName);
     if (targetView) {
         targetView.style.display = 'block';
-        
-        // [新增] 設定 body 的 data-page 屬性，觸發 CSS 背景切換
         document.body.setAttribute('data-page', tabName);
     }
     
-    // 啟用目標按鈕的 active 狀態 (高亮顯示)
     const targetBtn = document.getElementById('btn-' + tabName);
     if (targetBtn) targetBtn.classList.add('active');
 
-    // 處理頂部導航列 (Top Bar) 的狀態
     const backBtn = document.getElementById('nav-back-btn');
+    const homeBtn = document.getElementById('nav-home-btn');
     const titleEl = document.getElementById('app-title');
     
-    // 如果是首頁
     if (tabName === 'home') {
-        if (backBtn) backBtn.style.display = 'none'; // 隱藏返回鍵
-        if (titleEl) titleEl.innerText = '📅 校園王'; // 設定首頁標題
+        if (backBtn) backBtn.style.display = 'none';
+        if (homeBtn) homeBtn.style.display = 'none';
+        if (titleEl) titleEl.innerText = '📅 校園王';
     } else {
-        // 如果是其他內頁
-        if (backBtn) backBtn.style.display = 'block'; // 顯示返回鍵
+        if (backBtn) backBtn.style.display = 'block';
+        if (homeBtn) homeBtn.style.display = 'block';
         
-        // 根據頁面名稱設定標題
         let pageTitle = "校園王";
         switch(tabName) {
             case 'schedule': pageTitle = "我的課表"; break;
@@ -195,52 +167,38 @@ function switchTab(tabName, addToHistory = true) {
         if (titleEl) titleEl.innerText = pageTitle;
     }
 
-    // 加入瀏覽器歷史紀錄 (支援上一頁功能)
     if (addToHistory) {
         if (tabName !== 'home') {
-            // 推入新狀態，URL 加上 hash (如 #schedule)
             history.pushState({ view: tabName }, null, `#${tabName}`);
         } else {
-            // 回首頁狀態
             history.pushState({ view: 'home' }, null, './');
         }
     }
 
     // --- 針對特定頁面執行初始化邏輯 ---
     
-    // 如果切換到課表頁，預設顯示今天的課表，並切換回「本日課程」分頁
     if (tabName === 'schedule') {
         switchDay(currentDay);
-        // 新增這一行，確保預設顯示第一個分頁
         if (typeof switchScheduleMode === 'function') switchScheduleMode('daily');
     }
-    // 如果切換到行事曆，渲染月曆
     if (tabName === 'calendar') {
-        // 檢查函式是否存在 (避免未載入錯誤)
         if (typeof renderCalendar === 'function') renderCalendar();
     }
-    // 如果切換到資訊頁，載入公告
     if (tabName === 'info') loadAnnouncements();
-    // 如果切換到成績管理，預設顯示總覽分頁
     if (tabName === 'grade-manager' && typeof switchGradeTab === 'function') switchGradeTab('dashboard');
-    // 如果切換到記帳頁，預設顯示摘要分頁
     if (tabName === 'accounting') {
         if (typeof switchAccTab === 'function') switchAccTab('summary');
         else if (typeof renderAccounting === 'function') renderAccounting();
     }
-    // 如果切換到學習進度頁，渲染列表
     if (tabName === 'learning') {
         if (typeof renderLearning === 'function') renderLearning();
     }
-    // 如果切換到籤筒，初始化介面
     if (tabName === 'lottery') {
         if (typeof renderLottery === 'function') renderLottery();
     }
-    // 如果切換到通知頁，渲染設定列表
     if (tabName === 'notifications') {
         if (typeof renderNotificationApp === 'function') renderNotificationApp();
     }
-    // 如果切換到作業頁，渲染設定列表
     if (tabName === 'homework') {
         if (typeof renderHomework === 'function') renderHomework();
     }
@@ -249,24 +207,18 @@ function switchTab(tabName, addToHistory = true) {
 // 載入公告列表
 function loadAnnouncements() {
     const infoContent = document.getElementById('info-content');
-    // 注意：這裡假設 HTML 結構中有 info-content，若無則可能是在 view-info 內
-    // 原始碼邏輯是動態建立列表容器
     if (!infoContent) return;
     
-    // 清除舊的列表
     const oldList = document.getElementById('announcement-list');
     if (oldList) oldList.remove();
     
-    // 建立新容器
     const listContainer = document.createElement('div');
     listContainer.id = 'announcement-list';
     listContainer.style.marginTop = '15px';
     listContainer.innerHTML = '<p style="color:#999;">正在載入最新公告...</p>';
     
-    // 將列表附加到 infoContent 內
     infoContent.appendChild(listContainer);
     
-    // 從 Firebase 讀取公告 (依時間倒序，取前 10 筆)
     db.collection("announcements").orderBy("createdAt", "desc").limit(10).get()
     .then((querySnapshot) => {
         let html = '<h4 style="color: var(--primary); margin-top:20px;">📢 最新公告</h4>';
@@ -278,18 +230,14 @@ function loadAnnouncements() {
                 const data = doc.data();
                 const docId = doc.id;
                 
-                // 格式化時間
                 let dateStr = "剛剛";
                 if (data.createdAt) {
                     const date = data.createdAt.toDate();
-                    // 格式：M/D HH:mm
                     dateStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${(date.getMinutes()<10?'0':'') + date.getMinutes()}`;
                 }
                 
-                // 如果是管理員，顯示編輯/刪除按鈕
                 let adminBtns = '';
                 if (currentUser && currentUser.uid === ADMIN_UID) {
-                    // 對內容編碼以防 XSS 或引號問題
                     const safeContent = encodeURIComponent(data.content);
                     adminBtns = `
                         <div style="margin-top: 8px; text-align: right; border-top: 1px dashed #ddd; padding-top: 5px;">
@@ -299,7 +247,6 @@ function loadAnnouncements() {
                     `;
                 }
                 
-                // 產生公告卡片 HTML
                 html += `
                 <div style="background: var(--bg); padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--warning);">
                     <div style="font-size: 0.95rem; color: var(--text-main); white-space: pre-wrap;">${data.content}</div>
@@ -323,7 +270,6 @@ function loadAnnouncements() {
 // 應用程式初始化 (登入後呼叫)
 function initUI() {
     loadTheme(); 
-    // [確認] 這裡移除 userType 判斷，直接顯示
     document.getElementById('user-badge').innerText = '學生';
     
     const uniElements = document.querySelectorAll('.uni-only');
@@ -335,7 +281,7 @@ function initUI() {
     if (typeof renderAnalysis === 'function') renderAnalysis();
 }
 
-let isEditingCredits = false; // 紀錄是否處於編輯學分設定模式
+let isEditingCredits = false;
 
 
 // 新增分類的邏輯
@@ -347,14 +293,12 @@ window.addNewCategory = function() {
     if (!name) { showAlert("請輸入分類名稱"); return; }
     if (categoryTargets[name]) { showAlert("這個分類已經存在囉！"); return; }
 
-    // 根據類型初始化
     if (typeInput.value === 'complex') {
         categoryTargets[name] = { "必修": 0, "選修": 0 };
     } else {
         categoryTargets[name] = 0;
     }
 
-    // 清空輸入並重新渲染編輯介面
     nameInput.value = '';
     renderCreditSettings(); 
 }
@@ -373,11 +317,11 @@ window.deleteCategory = function(name) {
 // 切換主題 (Light <-> Dark)
 function toggleTheme() {
     const root = document.documentElement;
-    const currentTheme = root.getAttribute('data-theme');// 取得目前主題屬性
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';// 切換
-    root.setAttribute('data-theme', newTheme);// 設定 HTML 屬性 (讓 CSS 變數生效)
-    localStorage.setItem('theme', newTheme);// 儲存到 LocalStorage
-    updateThemeUI(newTheme);// 更新 UI 文字
+    const currentTheme = root.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeUI(newTheme);
 }
 
 // 載入已儲存的主題 (初始化時呼叫)
@@ -394,7 +338,6 @@ function updateThemeUI(theme) {
         statusEl.innerText = theme === 'dark' ? 'ON' : 'OFF';
         statusEl.style.color = theme === 'dark' ? '#2ecc71' : '#ccc';
     }
-    // 如果有圖表實例，可能需要重繪 (註解中留空)
     if (window.gradeChartInstance) {}
 }
 
@@ -402,28 +345,23 @@ function updateThemeUI(theme) {
 
 // 使用 html2canvas 將週課表表格轉為圖片下載
 function exportSchedule() {
-    // 取得表格元素
     const table = document.querySelector('.weekly-table');
     if (!table) return;
     
-    // 取得按鈕本身，以改變文字狀態
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
     btn.innerHTML = "⏳ 處理中...";
     
-    // 呼叫 html2canvas
     html2canvas(table, {
-        scale: 2, // 提高解析度 (2x)
-        backgroundColor: "#ffffff", // 設定背景白，避免透明
-        useCORS: true // 允許跨域圖片 (若有)
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true
     }).then(canvas => {
-        // 建立虛擬下載連結
         const link = document.createElement('a');
-        link.download = `我的課表_${currentSemester || 'export'}.png`; // 檔名
-        link.href = canvas.toDataURL("image/png"); // 轉為 Base64
-        link.click(); // 觸發下載
+        link.download = `我的課表_${currentSemester || 'export'}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
         
-        // 恢復按鈕文字
         btn.innerHTML = originalText;
         showAlert("課表圖片已下載至您的裝置！", "匯出成功");
     }).catch(err => {
@@ -437,20 +375,16 @@ function exportSchedule() {
 
 // 編輯公告
 function editAnnouncement(docId, encodedContent) {
-    // 解碼內容
     const oldContent = decodeURIComponent(encodedContent);
-    // 使用 showPrompt 讓管理員輸入新內容
     showPrompt("修改公告內容：", oldContent, "✏️ 編輯公告")
     .then((newContent) => {
-        // 若有輸入且不為空
         if (newContent !== null && newContent.trim() !== "") {
-            // 更新 Firestore
             db.collection("announcements").doc(docId).update({
                 content: newContent,
             })
             .then(() => {
                 showAlert("公告已更新！", "成功");
-                loadAnnouncements(); // 刷新列表
+                loadAnnouncements();
             })
             .catch((error) => {
                 showAlert("更新失敗：" + error.message, "錯誤");
@@ -461,15 +395,13 @@ function editAnnouncement(docId, encodedContent) {
 
 // 刪除公告
 function deleteAnnouncement(docId) {
-    // 顯示確認框
     showConfirm("確定要永久刪除這則公告嗎？", "🗑️ 刪除確認")
     .then((isConfirmed) => {
         if (isConfirmed) {
-            // 刪除 Firestore 文件
             db.collection("announcements").doc(docId).delete()
             .then(() => {
                 showAlert("公告已刪除。", "完成");
-                loadAnnouncements(); // 刷新列表
+                loadAnnouncements();
             })
             .catch((error) => {
                 showAlert("刪除失敗：" + error.message, "錯誤");
@@ -484,8 +416,8 @@ function editUserTitle() {
     .then(newName => {
         if (newName && newName.trim() !== "") {
             userTitle = newName.trim();
-            saveData(); // 存檔
-            refreshUI(); // 刷新畫面
+            saveData();
+            refreshUI();
             showAlert("名稱已更新！");
         }
     });
@@ -498,7 +430,6 @@ window.renderNotificationApp = function() {
     const list = document.getElementById('notification-settings-list');
     if (!list) return;
 
-    // 輔助函式：產生開關 HTML
     const createToggle = (key, title, desc, icon) => {
         const isOn = notificationSettings[key];
         const statusColor = isOn ? 'var(--primary)' : '#ccc';
@@ -527,25 +458,19 @@ window.renderNotificationApp = function() {
 
 // 切換設定
 window.toggleNotificationSetting = function(key) {
-    // 切換狀態
     notificationSettings[key] = !notificationSettings[key];
-    // 存檔
     saveData();
-    // 重新渲染以更新畫面 (ON/OFF)
     renderNotificationApp();
     
-    // 給予簡單的回饋
     const status = notificationSettings[key] ? "已開啟" : "已關閉";
-    // 如果有 showAlert 可以用，不然用 console
     if(window.showAlert) showAlert(`${status}通知`, "設定更新");
 }
 
-// [新增] 開啟登入視窗
+// 開啟登入視窗
 function openLoginModal() {
     const modal = document.getElementById('login-overlay');
     if (modal) {
         modal.style.display = 'flex';
-        // 加入簡單的淡入動畫 (選用)
         modal.style.opacity = '0';
         setTimeout(() => {
             modal.style.transition = 'opacity 0.3s';
@@ -554,7 +479,7 @@ function openLoginModal() {
     }
 }
 
-// [新增] 關閉登入視窗
+// 關閉登入視窗
 function closeLoginModal() {
     const modal = document.getElementById('login-overlay');
     if (modal) {
@@ -562,7 +487,7 @@ function closeLoginModal() {
     }
 }
 
-// [修改] 讓按鈕平滑滾動到特色區塊
+// 讓按鈕平滑滾動到特色區塊
 function scrollToFeatures() {
     const section = document.getElementById('features');
     if (section) {

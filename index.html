@@ -46,7 +46,10 @@
 </head>
 <body>
 	<nav id="top-bar" style="display: none;">
-		<button id="nav-back-btn" onclick="goBack()" style="display: none; background: transparent; border: none; color: white; font-size: 1.5rem; margin-right: 10px; cursor: pointer;">⬅</button>
+		<div style="display: flex; align-items: center; gap: 5px;">
+			<button id="nav-back-btn" onclick="goBack()" style="display: none; background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 10px;" title="回上一頁">⬅</button>
+			<button id="nav-home-btn" onclick="switchTab('home')" style="display: none; background: transparent; border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 10px;" title="回首頁">🏠</button>
+		</div>
 		<h1 id="app-title">📅 校園王</h1>
 		<div id="user-info" style="display: none;">
 			<div class="user-details" style="text-align: right; margin-right: 10px;">
@@ -164,9 +167,12 @@
 				<div id="subview-sch-weekly" style="display: none;">
 					<div class="card">
 						<h2>📅 週課表
-							<button class="btn-icon" onclick="exportSchedule()" style="font-size: 0.9rem; background: transparent; border: 1px solid #ddd;">📷 存成圖片</button>
+							<div style="display: flex; gap: 8px;">
+								<button id="btn-toggle-sch-edit" class="btn-icon" onclick="toggleWeeklyEditMode()" style="font-size: 0.9rem; background: transparent; border: 1px solid #ddd; color: #888; transition: all 0.3s;">🔒 唯讀模式</button>
+								<button class="btn-icon" onclick="exportSchedule()" style="font-size: 0.9rem; background: transparent; border: 1px solid #ddd;">📷 存成圖片</button>
+							</div>
 						</h2>
-						<div style="overflow-x: auto;">
+						<div style="width: 100%; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch;">
 							<table class="weekly-table">
 								<thead>
 									<tr>
@@ -212,10 +218,13 @@
 			</div>
 			<div id="view-calendar" style="display: none;">
 				<div class="card">
-					<div class="calendar-header">
-						<button class="btn-icon" onclick="changeMonth(-1)">◀</button>
-						<h3 id="calendar-month-year" style="margin:0; border:none;">2026年 1月</h3>
-						<button class="btn-icon" onclick="changeMonth(1)">▶</button>
+					<div class="calendar-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px;">
+						<div style="display: flex; align-items: center; gap: 15px;">
+							<button class="btn-icon" onclick="changeMonth(-1)">◀</button>
+							<h3 id="calendar-month-year" style="margin:0; border:none;">2026年 1月</h3>
+							<button class="btn-icon" onclick="changeMonth(1)">▶</button>
+						</div>
+						<button id="btn-toggle-cal-edit" class="btn-icon" onclick="toggleCalendarEditMode()" style="font-size: 0.85rem; background: transparent; border: 1px solid #ddd; color: #888; transition: all 0.3s; padding: 6px 12px;">🔒 唯讀模式</button>
 					</div>
 					<div class="calendar-grid" id="calendar-grid">
 						<div class="cal-day-header" style="color:#e74c3c">日</div>
@@ -496,9 +505,12 @@
 				</div>
 				<div id="view-acc-accounts" style="display: none;">
 					<div class="card">
-						<h2>💳 帳戶餘額概況</h2>
+						<h2 style="display: flex; justify-content: space-between; align-items: center;">
+							<span>💳 帳戶餘額概況</span>
+							<button id="btn-toggle-acc-edit" class="btn-icon" onclick="toggleAccAccountsEditMode()" style="font-size: 0.85rem; background: transparent; border: 1px solid #ddd; color: #888; transition: all 0.3s; padding: 6px 12px;">🔒 唯讀模式</button>
+						</h2>
 						<div id="acc-accounts-list"> </div>
-						<button class="btn btn-add" onclick="addPaymentMethod()">+ 新增支付方式</button>
+						<button id="btn-add-payment-method" class="btn btn-add" onclick="addPaymentMethod()" style="display: none;">+ 新增支付方式</button>
 					</div>
 				</div>
 			</div>
@@ -525,7 +537,7 @@
 			</div>
 			<div id="view-info" style="display: none;">
 				<div class="card">
-					<h2>🚀 校園王 App 功能總覽 (v6.4)</h2>
+					<h2>🚀 校園王 App 功能總覽 (v7.0)</h2>
 					<div style="background: #fff3e0; color: #e67e22; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 0.9rem; border-left: 4px solid #e67e22;">
 						<strong>💡 Web OS 架構：</strong><br>
 						本系統採用「類手機桌面」設計，所有功能皆獨立為 App，點擊圖示即可開啟，並支援深色模式切換。
@@ -541,6 +553,7 @@
 							<li><strong>圖片匯出：</strong>點擊「📷 存成圖片」，一鍵下載高畫質週課表。</li>
 							<li><strong>上課提醒：</strong>上課前 10 分鐘發送瀏覽器推播通知 (需開啟權限)。</li>
 							<li><strong>單日/週檢視：</strong>支援「本日課程」清單與「完整週課表」切換。</li>
+							<li><strong>防呆保護：</strong>全新「🔒 唯讀 / ✏️ 編輯」模式切換，滑動手機查看課表時不再誤觸編輯視窗！</li>
 						</ul>
 					</div>
 					<div style="margin-bottom: 20px;">
@@ -549,6 +562,7 @@
 							<li><strong>月曆視圖：</strong>提供視覺化月曆，可快速切換月份。</li>
 							<li><strong>週次顯示：</strong>標題列自動顯示該月份對應的「學期週次」(需先設定開學日)。</li>
 							<li><strong>活動清單：</strong>依時間排序顯示本學期所有重要日程。</li>
+							<li><strong>防呆保護：</strong>預設「🔒 唯讀模式」，瀏覽月份與活動時不再意外觸發新增選單。</li>
 						</ul>
 					</div>
 					<div style="margin-bottom: 20px;">
@@ -584,6 +598,7 @@
 							<li><strong>收支紀錄：</strong>快速紀錄每日收入與支出。</li>
 							<li><strong>即時結餘：</strong>首頁儀表板顯示本學期總收支與淨額。</li>
 							<li><strong>多帳戶管理：</strong>可新增多種支付方式 (如 LINE Pay、銀行)，並追蹤各帳戶餘額。</li>
+							<li><strong>帳戶安全與校正：</strong>帳戶頁面導入「🔒 唯讀模式」防誤刪；新增「智慧餘額校正」，直接修改餘額時，系統會自動計算差額並補上交易紀錄。</li>
 							<li><strong>圖表報表：</strong>
 								<ul>
 									<li><strong>月報表：</strong>長條圖比較每月收支狀況。</li>
@@ -753,7 +768,7 @@
 				<div class="feature-card">
 					<div class="f-icon">📅</div>
 					<h3>智慧課表</h3>
-					<p>直觀的互動式課表，支援<strong>色彩標記</strong>與<strong>連堂自動合併</strong>，並具備上課前推播提醒。</p>
+					<p>直觀的互動式課表，具備<strong>防誤觸唯讀模式</strong>、<strong>色彩標記</strong>與<strong>連堂自動合併</strong>，並支援上課前推播提醒。</p>
 				</div>
 				<div class="feature-card">
 					<div class="f-icon">🎨</div>
@@ -773,7 +788,7 @@
 				<div class="feature-card">
 					<div class="f-icon">💰</div>
 					<h3>學期記帳</h3>
-					<p>專屬學生的記帳工具，支援多帳戶管理 (如 LINE Pay) 與月報表分析，清楚掌握收支。</p>
+					<p>專屬學生的記帳工具，支援多帳戶管理與<strong>智慧餘額校正</strong>，搭配月報表分析，清楚掌握每一筆收支。</p>
 				</div>
 				<div class="feature-card">
 					<div class="f-icon">☁️</div>

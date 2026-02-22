@@ -7,7 +7,6 @@ function renderHomework() {
     const summaryDiv = document.getElementById('homework-summary');
     if (!listDiv) return;
 
-    // 排序：未完成的排前面，已完成的排後面；同狀態下按日期排序
     homeworkList.sort((a, b) => {
         if (a.completed !== b.completed) return a.completed ? 1 : -1;
         return new Date(a.date) - new Date(b.date);
@@ -27,7 +26,6 @@ function renderHomework() {
         homeworkList.forEach((item, index) => {
             if (item.completed) completedCount++;
 
-            // 狀態樣式
             const statusColor = item.completed ? '#2ecc71' : '#e74c3c';
             const cardOpacity = item.completed ? '0.7' : '1';
             const decoration = item.completed ? 'line-through' : 'none';
@@ -61,7 +59,6 @@ function renderHomework() {
     
     listDiv.innerHTML = html;
 
-    // 更新統計摘要
     if (summaryDiv) {
         summaryDiv.innerHTML = `
             <span style="margin-right: 15px;">總計: <b>${totalCount}</b></span>
@@ -73,11 +70,9 @@ function renderHomework() {
 
 // 儲存作業 (新增或修改)
 function addHomework() {
-    // 判斷目前是使用選單還是手寫輸入
     const selectEl = document.getElementById('input-hw-subject-select');
     const textEl = document.getElementById('input-hw-subject-text');
     
-    // 如果選單是顯示的，就取選單的值；否則取輸入框的值
     let subject = (selectEl.style.display !== 'none') ? selectEl.value : textEl.value;
     
     const title = document.getElementById('input-hw-title').value;
@@ -96,7 +91,6 @@ function addHomework() {
         date,
         score: score,
         total: total || 100,
-        // 保留原有的完成狀態
         completed: editingHomeworkIndex > -1 ? homeworkList[editingHomeworkIndex].completed : false
     };
 
@@ -129,15 +123,12 @@ function editHomework(index) {
         btn.style.background = "#f39c12";
     }
 
-    // 先更新下拉選單內容
     updateHomeworkSubjectOptions();
 
-    // 智慧判斷：如果科目在下拉選單裡，就切換到「自動模式」，否則切換到「手寫模式」
     const selectEl = document.getElementById('input-hw-subject-select');
     const textEl = document.getElementById('input-hw-subject-text');
     const toggleBtn = document.getElementById('btn-toggle-hw-input');
     
-    // 檢查選單中是否有這個科目
     let optionExists = false;
     for (let i = 0; i < selectEl.options.length; i++) {
         if (selectEl.options[i].value === item.subject) {
@@ -147,20 +138,17 @@ function editHomework(index) {
     }
 
     if (optionExists) {
-        // 切換到選單模式
         selectEl.style.display = 'block';
         textEl.style.display = 'none';
-        selectEl.value = item.subject; // 選中該科目
-        toggleBtn.innerText = "✏️"; // 按鈕顯示為「切換到手寫」
+        selectEl.value = item.subject;
+        toggleBtn.innerText = "✏️";
     } else {
-        // 切換到手寫模式
         selectEl.style.display = 'none';
         textEl.style.display = 'block';
-        textEl.value = item.subject; // 填入文字
-        toggleBtn.innerText = "📜"; // 按鈕顯示為「切換到選單」
+        textEl.value = item.subject;
+        toggleBtn.innerText = "📜";
     }
 
-    // 回填其他欄位
     document.getElementById('input-hw-title').value = item.title;
     document.getElementById('input-hw-date').value = item.date;
     document.getElementById('input-hw-score').value = item.score || '';
@@ -174,16 +162,14 @@ function toggleHomeworkSubjectMode() {
     const btn = document.getElementById('btn-toggle-hw-input');
 
     if (selectEl.style.display !== 'none') {
-        // 目前是選單 -> 切換成手寫
         selectEl.style.display = 'none';
         textEl.style.display = 'block';
-        textEl.focus(); // 自動聚焦
-        btn.innerText = "📜"; // 圖示變成清單
+        textEl.focus();
+        btn.innerText = "📜";
     } else {
-        // 目前是手寫 -> 切換成選單
         selectEl.style.display = 'block';
         textEl.style.display = 'none';
-        btn.innerText = "✏️"; // 圖示變成鉛筆
+        btn.innerText = "✏️";
     }
 }
 
@@ -211,22 +197,19 @@ function openHomeworkModal() {
         btn.style.background = "var(--primary)";
     }
 
-    // 預設日期
     document.getElementById('input-hw-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('input-hw-title').value = '';
     document.getElementById('input-hw-score').value = '';
     document.getElementById('input-hw-total').value = '100';
 
-    // 更新科目選單
     updateHomeworkSubjectOptions();
     
-    // 預設重置為「選單模式」
     const selectEl = document.getElementById('input-hw-subject-select');
     const textEl = document.getElementById('input-hw-subject-text');
     const toggleBtn = document.getElementById('btn-toggle-hw-input');
     
     selectEl.style.display = 'block';
-    selectEl.value = ''; // 預設不選
+    selectEl.value = '';
     textEl.style.display = 'none';
     textEl.value = '';
     toggleBtn.innerText = "✏️";
@@ -242,11 +225,9 @@ function updateHomeworkSubjectOptions() {
     const select = document.getElementById('input-hw-subject-select');
     if (!select) return;
 
-    // 清空並加入預設選項
     select.innerHTML = '<option value="" disabled selected>請選擇科目</option>';
     
     let subjects = new Set();
-    // 從週課表抓取所有科目
     if (typeof weeklySchedule !== 'undefined') {
         Object.values(weeklySchedule).forEach(day => {
             day.forEach(c => {
@@ -255,7 +236,6 @@ function updateHomeworkSubjectOptions() {
         });
     }
 
-    // 產生選項
     subjects.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s;

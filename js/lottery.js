@@ -23,7 +23,6 @@ function renderLottery() {
     
     if (!listDiv || !select) return;
 
-    // 1. 渲染分類下拉選單
     select.innerHTML = '';
     lotteryList.forEach((cat, index) => {
         const option = document.createElement('option');
@@ -33,7 +32,6 @@ function renderLottery() {
         select.appendChild(option);
     });
 
-    // 2. 渲染目前分類的選項列表
     const currentData = lotteryList[currentCategoryIndex];
     let html = '';
     
@@ -65,9 +63,8 @@ function addLotteryItem() {
     
     if (!val) return;
 
-    // 加入目前分類
     lotteryList[currentCategoryIndex].items.push(val);
-    input.value = ''; // 清空輸入框
+    input.value = '';
     
     saveData();
     renderLottery();
@@ -89,7 +86,7 @@ function addNewLotteryCategory() {
                 title: title,
                 items: []
             });
-            currentCategoryIndex = lotteryList.length - 1; // 切換到新的
+            currentCategoryIndex = lotteryList.length - 1;
             saveData();
             renderLottery();
         }
@@ -107,7 +104,7 @@ function deleteLotteryCategory() {
     showConfirm(`確定要刪除「${currentTitle}」嗎？`, "刪除確認").then(ok => {
         if (ok) {
             lotteryList.splice(currentCategoryIndex, 1);
-            currentCategoryIndex = 0; // 回到第一個
+            currentCategoryIndex = 0;
             saveData();
             renderLottery();
         }
@@ -116,7 +113,7 @@ function deleteLotteryCategory() {
 
 // --- 抽籤核心邏輯 (動畫) ---
 function startLottery() {
-    if (isDrawing) return; // 防止重複點擊
+    if (isDrawing) return;
 
     const currentItems = lotteryList[currentCategoryIndex].items;
     
@@ -134,35 +131,30 @@ function startLottery() {
     resultBox.style.color = "var(--primary)";
 
     let count = 0;
-    const totalTime = 30; // 跑幾次跳動 (決定動畫時間長度)
+    const totalTime = 30;
     
-    // 開始快速跳動
     drawInterval = setInterval(() => {
-        // 隨機顯示一個
         const randIndex = Math.floor(Math.random() * currentItems.length);
         resultBox.innerText = currentItems[randIndex];
         
         count++;
-        // 停止條件
         if (count > totalTime) {
             clearInterval(drawInterval);
             finishDraw(resultBox, btn);
         }
-    }, 50 + (count * 2)); // 這裡其實是固定的 50ms，若要變速需用遞迴 setTimeout，這裡用 setInterval 簡單處理
+    }, 50 + (count * 2));
 }
 
 function finishDraw(resultBox, btn) {
-    // 最終決定 (再隨機一次確保公平)
     const currentItems = lotteryList[currentCategoryIndex].items;
     const finalIndex = Math.floor(Math.random() * currentItems.length);
     const winner = currentItems[finalIndex];
 
     resultBox.innerText = `🎉 ${winner} 🎉`;
-    resultBox.style.color = "#e74c3c"; // 結果變紅色
+    resultBox.style.color = "#e74c3c";
     resultBox.style.transform = "scale(1.2)";
     resultBox.style.transition = "transform 0.2s";
     
-    // 稍微復原特效
     setTimeout(() => {
         resultBox.style.transform = "scale(1)";
     }, 200);

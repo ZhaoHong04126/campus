@@ -3,33 +3,28 @@ let editingGradeIndex = -1;
 
 // 載入並渲染學期成績列表 (計算 GPA 與總學分)
 function loadGrades() {
-    const tb = document.getElementById('grade-body');// 取得表格的 tbody 元素 (用來放成績列)
-    if (!tb) return;// 如果找不到元素 (可能不在成績頁面)，則直接結束函式
-    tb.innerHTML = '';// 清空目前的表格內容，避免重複堆疊
+    const tb = document.getElementById('grade-body');
+    if (!tb) return;
+    tb.innerHTML = '';
     
     // 初始化統計變數
     //  加權    總學分   實得學分
     let ts = 0, tc = 0, ec = 0;
     
-    // 遍歷所有成績資料 (gradeList 是全域變數，存放在 data.js/state.js)
     gradeList.forEach(g => {
-        // 取得學分，預設為 1
         const cr = parseFloat(g.credit) || 1;
               sc = parseFloat(g.score);
-        // 判斷是否為自主學習 (分數為 -1 且 科目為 自主學習)
         const isSelfStudy = (sc === -1 && g.subject === '自主學習');
         
         let displayScore = sc;
         let scoreColor = '';
 
         if (isSelfStudy){
-            ec += cr; // 計入實學分
-            // 不列入ts與tc
+            ec += cr;
             displayScore = '<span style="background:#e8f5e9; color:#2e7d32; padding:2px 6px; border-radius:4px; font-size:0.85rem;">P (通過)</span>';
-            scoreColor = ''; // 顏色已在 HTML 中設定
+            scoreColor = '';
         }else{
-            // 一般課程邏輯
-            sc = sc || 0; // 確保是數字
+            sc = sc || 0;
             const pass = sc >= 60;
             if (pass) ec += cr;
             ts += sc * cr;
@@ -47,19 +42,16 @@ function loadGrades() {
         </tr>`;
     }); 
     
-    let avg = 0; // 計算加權平均
-    if (tc > 0) avg = ts / tc; // 避免除以 0 的錯誤
-    // 更新介面上顯示的平均分數 (保留兩位小數) 與實得學分
+    let avg = 0;
+    if (tc > 0) avg = ts / tc;
     document.getElementById('average-score').innerHTML = `加權平均: ${avg.toFixed(2)} <span style="font-size:0.8rem; color:#666;">(實得${ec}學分)</span>`;
 }
 
 // 渲染編輯 Modal (彈出視窗) 中的成績列表
 // 讓使用者可以在新增/修改視窗中看到目前已有的成績
 function renderGradeEditList() {
-    // 取得列表容器
     const listDiv = document.getElementById('current-grade-list');
     let html = ''; 
-    // 遍歷成績列表產生卡片式介面
     gradeList.forEach((item, i) => {
         const info = `${item.credit}學分 | ${item.score}分`;
         html += `
@@ -74,7 +66,6 @@ function renderGradeEditList() {
             </div>
         </div>`;
     });
-    // 如果沒有成績，顯示提示文字
     listDiv.innerHTML = html || '<p style="color:#999; text-align:center">無成績</p>';
 }
 
@@ -85,16 +76,13 @@ function editGrade(index) {
 
     updateExamSubjectOptions(); 
 
-    // 判斷是否為自主學習
     const isSelfStudy = (item.score === -1 && item.subject === '自主學習');
     
-    // 設定 Checkbox 狀態
     const chk = document.getElementById('input-grade-self-study');
     chk.checked = isSelfStudy;
-    toggleSelfStudyMode(); // 觸發 UI 切換
+    toggleSelfStudyMode();
 
     if (!isSelfStudy) {
-        // 如果是一般課程，才需要回填科目與分數
         const sel = document.getElementById('input-grade-subject-select');
         const txt = document.getElementById('input-grade-subject-text');
         const btn = document.getElementById('btn-toggle-input');
@@ -116,7 +104,6 @@ function editGrade(index) {
         document.getElementById('input-grade-nature').value = item.nature || '必修';
     }
 
-    // 學分無論如何都要回填
     document.getElementById('input-grade-credit').value = item.credit || '';
 
     editingGradeIndex = index;
@@ -130,17 +117,14 @@ function editGrade(index) {
 // 新增或儲存成績到列表
 function addGrade() {
     const isSelfStudy = document.getElementById('input-grade-self-study').checked;
-    
     let s, category, nature, sc;
 
     if (isSelfStudy) {
-        // 自主學習：自動填入預設值
         s = "自主學習";
         category = "自由";
         nature = "選修";
-        sc = -1; // 使用 -1 代表無分數/通過
+        sc = -1;
     } else {
-        // 一般模式：讀取輸入框
         const sel = document.getElementById('input-grade-subject-select');
         const txt = document.getElementById('input-grade-subject-text');
         s = (sel.style.display !== 'none') ? sel.value : txt.value;
@@ -150,8 +134,6 @@ function addGrade() {
     }
 
     const c = document.getElementById('input-grade-credit').value;
-
-    // 驗證：若為自主學習則跳過分數與科目檢查，否則需檢查
     if ( (isSelfStudy) || (s && sc) ) {
         const gradeData = {
             subject: s, 
@@ -171,7 +153,6 @@ function addGrade() {
         resetGradeInput();
         saveData();
         renderGradeEditList();
-        // 如果是在成績單頁面，立即刷新計算
         if(document.getElementById('grade-body')) loadGrades();
     } else {
         showAlert('資料不完整，請檢查科目與分數', '錯誤');
@@ -180,22 +161,20 @@ function addGrade() {
 
 // 重置成績輸入框與狀態 (恢復成新增模式)
 function resetGradeInput() {
-    // 重置 Checkbox
     const chk = document.getElementById('input-grade-self-study');
     if(chk) {
         chk.checked = false;
-        toggleSelfStudyMode(); // 恢復顯示所有欄位
+        toggleSelfStudyMode();
     }
 
     document.getElementById('input-grade-subject-select').style.display = 'block';
     document.getElementById('input-grade-subject-text').style.display = 'none';
     document.getElementById('btn-toggle-input').innerText = "✏️";
-    
     document.getElementById('input-grade-subject-select').value = '';
     document.getElementById('input-grade-subject-text').value = '';
     document.getElementById('input-grade-category').value = '通識'; 
     document.getElementById('input-grade-nature').value = '必修';
-    document.getElementById('input-grade-credit').value = '1'; // 自主學習通常學分較少，這裡預設還是1，使用者可改
+    document.getElementById('input-grade-credit').value = '1';
     document.getElementById('input-grade-score').value = '';
     
     editingGradeIndex = -1;
@@ -209,13 +188,12 @@ function resetGradeInput() {
 
 // 刪除成績
 function deleteGrade(i) {
-    // 顯示確認對話框
     showConfirm('確定刪除此成績？', '刪除確認').then(ok => {
         if (ok) {
-            if (editingGradeIndex === i) resetGradeInput();// 如果正在編輯這筆資料，先重置輸入框以免出錯
-            gradeList.splice(i, 1);// 從陣列移除
-            saveData();// 存檔
-            renderGradeEditList();//刷新介面
+            if (editingGradeIndex === i) resetGradeInput();
+            gradeList.splice(i, 1);
+            saveData();
+            renderGradeEditList();
         }
     });
 }
@@ -225,8 +203,8 @@ function updateGradeCategoryOptions() {
     const select = document.getElementById('input-grade-category');
     if (!select) return;
 
-    const currentVal = select.value; // 暫存目前選的值
-    select.innerHTML = ''; // 清空選項
+    const currentVal = select.value;
+    select.innerHTML = '';
 
     const categories = Object.keys(categoryTargets);
     
@@ -239,7 +217,6 @@ function updateGradeCategoryOptions() {
             opt.innerText = cat;
             select.appendChild(opt);
         });
-        // 額外加入「其他」作為備用
         if (!categoryTargets['其他']) {
              const opt = document.createElement('option');
              opt.value = '其他';
@@ -248,7 +225,6 @@ function updateGradeCategoryOptions() {
         }
     }
     
-    // 嘗試選回原本的值
     if (currentVal && (categories.includes(currentVal) || currentVal === '其他')) {
         select.value = currentVal;
     }
@@ -258,7 +234,6 @@ function openGradeModal() {
     updateExamSubjectOptions();// 開啟前先更新科目選單
     updateGradeCategoryOptions(); // 更新分類選單
     document.getElementById('grade-modal').style.display = 'flex';// 顯示 Modal
-    // 確保學分輸入框顯示 (因為有些情境可能被隱藏)
     const g = document.getElementById('input-credit-group');
     if (g) g.style.display = 'block'; 
     resetGradeInput(); // 重置輸入狀態
@@ -274,46 +249,37 @@ function closeGradeModal() {
 // 更新所有成績相關 Modal 中的「科目下拉選單」
 // 這會自動抓取「課表」中的科目名稱，讓使用者不用手打
 function updateExamSubjectOptions() {
-    // 取得三個主要選單：平常考、段考、學期成績
     const regSelect = document.getElementById('regular-subject-select');
     const midSelect = document.getElementById('midterm-subject-select');
     const gradeSelect = document.getElementById('input-grade-subject-select'); 
     
-    // 如果找不到元素則結束
     if (!regSelect || !midSelect || !gradeSelect) return;
 
-    // 暫存目前使用者選中的值，以免刷新後被洗掉
     const regVal = regSelect.value;
     const midVal = midSelect.value;
     const gradeVal = gradeSelect.value;
 
-    // 清空選項並加入預設值
     const placeholder = '<option value="" disabled selected>選擇科目</option>';
     regSelect.innerHTML = placeholder
     midSelect.innerHTML = placeholder;
     gradeSelect.innerHTML = placeholder;
 
-    // 使用 Set 來儲存科目名稱，自動過濾重複的
     let allSubjects = new Set(); 
-    // 遍歷每週課表，收集所有科目
     Object.values(weeklySchedule).forEach(dayCourses => {
         dayCourses.forEach(course => {
             if (course.subject) allSubjects.add(course.subject);
         });
     });
 
-    // 將科目排序後建立 option 元素並加入到三個選單中
     Array.from(allSubjects).sort().forEach(sub => {
         const opt = document.createElement('option');
         opt.value = sub;
         opt.innerText = sub;
-        // cloneNode(true) 是因為一個 DOM 元素只能存在一個地方，要複製三份
         regSelect.appendChild(opt.cloneNode(true));
         midSelect.appendChild(opt.cloneNode(true));
         gradeSelect.appendChild(opt.cloneNode(true));
     });
 
-    // 如果之前有選中值，嘗試選回去
     if (regVal) regSelect.value = regVal;
     if (midVal) midSelect.value = midVal;
     if (gradeVal) gradeSelect.value = gradeVal;
@@ -331,19 +297,15 @@ function renderRegularExams() {
     const tbody = document.getElementById('regular-exam-body');
     if (!tbody) return;
 
-    // 如果沒選科目
     if (!subject) {
         tbody.innerHTML = '<tr><td colspan="2" class="no-class">👈 請先選擇科目</td></tr>';
         return;
     }
 
-    // 從 regularExams 物件中取得該科目的成績陣列
     const scores = regularExams[subject] || [];
-    // 如果沒資料
     if (scores.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" class="no-class">📭 目前無紀錄</td></tr>';
     } else {
-        // 產生列表 HTML
         tbody.innerHTML = scores.map((item, index) => `
             <tr>
                 <td style="text-align:left; padding-left:10px;">
@@ -385,13 +347,10 @@ function renderMidtermExams() {
 // 開啟平常考新增視窗
 function openRegularModal() {
     const subject = document.getElementById('regular-subject-select').value;
-    if (!subject) { showAlert("請先在上方選單選擇一個科目！"); return; }// 必須先選科目才能新增
-    // 在 Modal 標題顯示目前科目
+    if (!subject) { showAlert("請先在上方選單選擇一個科目！"); return; }
     document.getElementById('modal-regular-subject-name').innerText = subject;
-    // 清空輸入框
     document.getElementById('input-regular-name').value = '';
     document.getElementById('input-regular-score').value = '';
-    // 顯示 Modal
     document.getElementById('regular-exam-modal').style.display = 'flex';
 }
 // 關閉平常考 Modal
@@ -406,9 +365,7 @@ function addRegularExam() {
 
     if (!name || !score) { showAlert("請輸入名稱和分數"); return; }
 
-    // 如果該科目還沒有成績陣列，先初始化
     if (!regularExams[subject]) regularExams[subject] = [];
-    // 推入新成績
     regularExams[subject].push({ title: name, score: parseInt(score) || 0 });
 
     saveData(); 
@@ -446,7 +403,6 @@ function addMidtermExam() {
     const score = document.getElementById('input-midterm-score').value;
 
     if (!name || !score) { showAlert("請輸入名稱和分數"); return; }
-
     if (!midtermExams[subject]) midtermExams[subject] = [];
     midtermExams[subject].push({ title: name, score: parseInt(score) || 0 });
 
@@ -472,36 +428,30 @@ function toggleGradeInputMode() {
     const txt = document.getElementById('input-grade-subject-text');
     const btn = document.getElementById('btn-toggle-input');
     
-    // 如果選單目前顯示，則隱藏選單，顯示文字框
     if (sel.style.display !== 'none') {
         sel.style.display = 'none';
         txt.style.display = 'block';
-        btn.innerText = "📜"; // 按鈕變成切換回清單的圖示
+        btn.innerText = "📜";
         txt.focus();
     } else {
-        // 反之亦然
         sel.style.display = 'block';
         txt.style.display = 'none';
         btn.innerText = "✏️";
     }
 }
 
-// [新增] 切換自主學習模式
+// 切換自主學習模式
 function toggleSelfStudyMode() {
     const isSelfStudy = document.getElementById('input-grade-self-study').checked;
-    
-    // 取得要隱藏的區塊
     const groupSubject = document.getElementById('group-grade-subject');
     const groupCatNature = document.getElementById('group-grade-cat-nature');
     const groupScore = document.getElementById('group-grade-score');
     
     if (isSelfStudy) {
-        // 隱藏欄位
         groupSubject.style.display = 'none';
         groupCatNature.style.display = 'none';
         groupScore.style.display = 'none';
     } else {
-        // 恢復顯示
         groupSubject.style.display = 'block';
         groupCatNature.style.display = 'block';
         groupScore.style.display = 'block';
@@ -519,7 +469,6 @@ function calculateSemesterAverage(grades) {
         const cr = parseFloat(g.credit) || 1;
         const sc = parseFloat(g.score);
         
-        // 如果分數不是 -1 (非自主學習)，才納入平均計算
         if (sc !== -1) {
             ts += (sc || 0) * cr;
             tc += cr;
@@ -532,12 +481,11 @@ function calculateSemesterAverage(grades) {
 function renderAnalysis() {
     const labels = [];
     const dataPoints = [];
-    let totalCreditsEarned = 0; // 總實得學分
+    let totalCreditsEarned = 0;
     
-    // 分類統計物件
     let categoryEarned = {};
-    const categories = Object.keys(categoryTargets); // 改成讀取設定的 keys
-    if(!categories.includes('其他')) categories.push('其他'); // 確保有其他
+    const categories = Object.keys(categoryTargets);
+    if(!categories.includes('其他')) categories.push('其他');
     
     categories.forEach(cat => {
         categoryEarned[cat] = { total: 0, "必修": 0, "選修": 0, "必選修": 0 };
@@ -550,12 +498,10 @@ function renderAnalysis() {
         let grades = (sem === currentSemester) ? gradeList : (semData ? semData.grades : []);
 
         if (grades) {
-            // 1. 計算該學期平均 (需排除 -1 分)
             let semTs = 0, semTc = 0;
             grades.forEach(g => {
                 const s = parseFloat(g.score);
                 const c = parseFloat(g.credit) || 0;
-                // 只有非自主學習才算入平均
                 if (s !== -1) {
                     semTs += (s || 0) * c;
                     semTc += c;
@@ -568,19 +514,15 @@ function renderAnalysis() {
                 dataPoints.push(avg);
             }
             
-            // 2. 累加學分詳細統計
             grades.forEach(g => {
                 const sc = parseFloat(g.score);
                 const cr = parseFloat(g.credit) || 0;
                 const cat = g.category || '其他';
                 const nature = g.nature || '必修';
-
-                // [修正點] 判斷及格：分數 >= 60 或者 分數 == -1 (自主學習)
                 const isPassed = (sc >= 60) || (sc === -1);
 
                 if (isPassed) {
                     totalCreditsEarned += cr;
-                    
                     if (!categoryEarned[cat]) {
                         categoryEarned[cat] = { total: 0, "必修": 0, "選修": 0, "必選修": 0 };
                     }
@@ -596,7 +538,6 @@ function renderAnalysis() {
         }
     });
 
-    // 以下繪圖邏輯保持不變...
     const ctx = document.getElementById('gradeChart');
     if (ctx) {
         if (gradeChartInstance) gradeChartInstance.destroy();
@@ -674,22 +615,20 @@ function updateTotalProgressBar(earned) {
     if(container) container.style.display = 'block';
 
     if (progressEl && totalEl) {
-        // 計算百分比，最大 100%
         const percentage = Math.min((earned / graduationTarget) * 100, 100);
         progressEl.style.width = percentage + '%';
         
-        // 根據進度變換顏色 (紅 -> 黃 -> 綠)
         if(percentage < 30) progressEl.style.background = '#e74c3c';
         else if(percentage < 70) progressEl.style.background = '#f39c12';
         else progressEl.style.background = '#2ecc71';
 
-        totalEl.innerText = earned;// 更新文字數值
+        totalEl.innerText = earned;
     }
 }
 
 // 渲染各學分模組 (通識、專業...) 的詳細進度
 function renderCategoryBreakdown(earnedMap) {
-    const panelUni = document.getElementById('panel-credits-uni');// 大學面板
+    const panelUni = document.getElementById('panel-credits-uni');
     const listUni = document.getElementById('list-credits-uni');
 
     if (!panelUni) return;
@@ -705,14 +644,12 @@ function renderCategoryBreakdown(earnedMap) {
     order.forEach(cat => {
         const data = earnedMap[cat] || { total: 0, "必修": 0, "選修": 0 };
         const targetConfig = categoryTargets[cat];
-        // 判斷該類別目標是否細分為必修/選修物件
         const isComplex = (typeof targetConfig === 'object');
 
         // 簡單模式 (只看總學分，不分必選修)
         if (!isComplex) {
             const target = targetConfig || 0;
             const earned = data.total;
-            // 若無目標且無實得學分，則隱藏不顯示
             if (target === 0 && earned === 0 && cat !== "其他") return;
             let percent = 0; if (target > 0) percent = Math.min(Math.round((earned / target) * 100), 100);
             let barColor = percent >= 100 ? "#2ecc71" : "#4a90e2";
@@ -728,7 +665,6 @@ function renderCategoryBreakdown(earnedMap) {
                 </div>
             </div>`;
         } 
-        // 複雜模式 (顯示必修與選修雙進度條)
         else {
             const reqTarget = targetConfig["必修"] || 0;
             const eleTarget = targetConfig["選修"] || 0;
@@ -770,10 +706,9 @@ function updateGraduationTarget(val) {
     const newVal = parseInt(val);
     if (newVal && newVal > 0) {
         graduationTarget = newVal;
-        saveData(); // 存檔
+        saveData();
     } else {
         showAlert("請輸入有效的正整數");
-        // 回復原值
         document.getElementById('setting-grad-target').value = graduationTarget;
     }
 }
@@ -782,7 +717,6 @@ function updateGraduationTarget(val) {
 function switchGradeTab(tabName) {
     const tabs = ['dashboard', 'regular', 'midterm', 'list', 'chart', 'credits'];
 
-    // 隱藏所有分頁
     tabs.forEach(t => {
         const btn = document.getElementById(`tab-grade-${t}`);
         const view = document.getElementById(`subview-grade-${t}`);
@@ -790,13 +724,11 @@ function switchGradeTab(tabName) {
         if (view) view.style.display = 'none';
     });
 
-    // 顯示目標分頁
     const activeBtn = document.getElementById(`tab-grade-${tabName}`);
     const activeView = document.getElementById(`subview-grade-${tabName}`);
     if (activeBtn) activeBtn.classList.add('active');
     if (activeView) activeView.style.display = 'block';
 
-    // 根據不同分頁執行對應的初始化/渲染函式
     if (tabName === 'dashboard') {
         renderGradeDashboard();
     } else if (tabName === 'regular') {
@@ -810,8 +742,8 @@ function switchGradeTab(tabName) {
     }
 
     if (tabName === 'credits'){
-        renderAnalysis();//選染進度條
-        renderCreditSettings();// 喧染學校資訊與設定數值
+        renderAnalysis();
+        renderCreditSettings();
     } else if (tabName === 'chart'){
         setTimeout(() => {
             if (typeof renderAnalysis === 'function') renderAnalysis(); 
@@ -822,31 +754,23 @@ function switchGradeTab(tabName) {
 
 // 渲染「總覽」分頁的統計儀表板
 function renderGradeDashboard() {
-    let totalScore = 0;        // 加權總分 (分子)
-    let totalCreditsForGpa = 0; // GPA 計算用的總學分 (分母)
-    let earnedCredits = 0;     // 實際獲得的總學分 (包含自主學習)
-    let failedCount = 0;       // 不及格科目數
+    let totalScore = 0;      
+    let totalCreditsForGpa = 0;
+    let earnedCredits = 0;
+    let failedCount = 0;
 
-    // 計算總體數據
     gradeList.forEach(g => {
-        const score = parseFloat(g.score); // 取得原始分數 (可能是 -1)
+        const score = parseFloat(g.score);
         const credit = parseFloat(g.credit) || 0;
         
-        // 判斷是否為自主學習 (分數為 -1)
         const isSelfStudy = (score === -1);
 
         if (isSelfStudy) {
-            // --- 自主學習邏輯 ---
-            // 1. 算入實得學分
             earnedCredits += credit;
-            // 2. 不算入 GPA 分子與分母
-            // 3. 不算是不及格
         } else {
-            // --- 一般課程邏輯 ---
             const valScore = score || 0;
             const isPass = valScore >= 60;
 
-            // 只有一般課程才算入 GPA
             totalScore += valScore * credit;
             totalCreditsForGpa += credit;
             
@@ -855,10 +779,7 @@ function renderGradeDashboard() {
         }
     });
 
-    // 計算 GPA (分母改用排除自主學習後的 totalCreditsForGpa)
     const avg = totalCreditsForGpa > 0 ? (totalScore / totalCreditsForGpa).toFixed(1) : "0.0";
-
-    // 更新介面數字
     const elGpa = document.getElementById('dash-gpa');
     const elCredits = document.getElementById('dash-credits');
     const elFailed = document.getElementById('dash-failed');
@@ -868,9 +789,8 @@ function renderGradeDashboard() {
     if (elFailed) elFailed.innerText = failedCount;
 }
 
-// [新增] 渲染學分設定介面 (學校資訊 + 編輯列表)
+// 渲染學分設定介面 (學校資訊 + 編輯列表)
 function renderCreditSettings() {
-    // 1. 更新顯示模式的學校資訊
     const displayEl = document.getElementById('school-info-display');
     if (displayEl) {
         if (userSchoolInfo.school || userSchoolInfo.department) {
@@ -880,7 +800,6 @@ function renderCreditSettings() {
         }
     }
     
-    // 2. 更新編輯模式的輸入框
     const schoolInput = document.getElementById('input-school-name');
     const deptInput = document.getElementById('input-dept-name');
     const gradInput = document.getElementById('edit-grad-target');
@@ -891,7 +810,6 @@ function renderCreditSettings() {
     if (gradInput) gradInput.value = graduationTarget;
     if (textGradTarget) textGradTarget.innerText = graduationTarget;
 
-    // 3. 渲染編輯列表 (edit-settings-uni)
     const editUni = document.getElementById('edit-settings-uni');
     if (!editUni) return;
 
@@ -912,12 +830,10 @@ function renderCreditSettings() {
                 <div style="display: flex; gap: 10px;">`;
             
             if (typeof target === 'object') {
-                // 複雜模式 (分必選修)
                 editHtml += `
                     <div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">必修</span><input type="number" id="edit-cat-${cat}-req" value="${target['必修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
                     <div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">選修</span><input type="number" id="edit-cat-${cat}-ele" value="${target['選修']||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
             } else {
-                // 簡單模式 (單一數值)
                 editHtml += `<div style="flex: 1;"><span style="font-size: 0.8rem; color:#666;">目標學分</span><input type="number" id="edit-cat-${cat}-total" value="${target||0}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>`;
             }
             editHtml += `</div></div>`;
@@ -926,27 +842,26 @@ function renderCreditSettings() {
     editUni.innerHTML = editHtml;
 }
 
-// [新增] 切換學分 檢視/編輯 模式
+// 切換學分 檢視/編輯 模式
 function toggleCreditEdit() {
     const viewDiv = document.getElementById('credits-view-mode');
     const editDiv = document.getElementById('credits-edit-mode');
     const btn = document.getElementById('btn-edit-credits');
     
-    // 判斷目前狀態 (若 editDiv 顯示中，代表要關閉編輯)
     if (editDiv.style.display === 'block') {
         viewDiv.style.display = 'block';
         editDiv.style.display = 'none';
-        btn.style.display = 'block'; // 顯示設定按鈕
-        renderAnalysis(); // 刷新圖表與進度條
+        btn.style.display = 'block';
+        renderAnalysis();
     } else {
         viewDiv.style.display = 'none';
         editDiv.style.display = 'block';
-        btn.style.display = 'none'; // 隱藏設定按鈕
-        renderCreditSettings(); // 渲染編輯介面數值
+        btn.style.display = 'none';
+        renderCreditSettings();
     }
 }
 
-// [新增] 新增分類邏輯
+// 新增分類邏輯
 window.addNewCategory = function() {
     const nameInput = document.getElementById('new-cat-name');
     const typeInput = document.getElementById('new-cat-type');
@@ -954,8 +869,6 @@ window.addNewCategory = function() {
     
     if (!name) { showAlert("請輸入分類名稱"); return; }
     if (categoryTargets[name]) { showAlert("這個分類已經存在囉！"); return; }
-
-    // 初始化
     if (typeInput.value === 'complex') {
         categoryTargets[name] = { "必修": 0, "選修": 0 };
     } else {
@@ -963,10 +876,10 @@ window.addNewCategory = function() {
     }
 
     nameInput.value = '';
-    renderCreditSettings(); // 重新渲染列表
+    renderCreditSettings();
 }
 
-// [新增] 刪除分類邏輯
+// 刪除分類邏輯
 window.deleteCategory = function(name) {
     if(confirm(`確定要刪除「${name}」分類嗎？\n(這不會刪除已登記的成績，但在統計時會被歸類到「其他」)`)) {
         delete categoryTargets[name];
@@ -974,19 +887,16 @@ window.deleteCategory = function(name) {
     }
 }
 
-// [新增] 儲存學分設定
+// 儲存學分設定
 function saveCreditSettings() {
-    // 1. 儲存學校資訊
     const schoolInput = document.getElementById('input-school-name');
     const deptInput = document.getElementById('input-dept-name');
     if (schoolInput) userSchoolInfo.school = schoolInput.value.trim();
     if (deptInput) userSchoolInfo.department = deptInput.value.trim();
 
-    // 2. 儲存畢業總目標
     const gradInput = document.getElementById('edit-grad-target');
     if (gradInput) graduationTarget = parseInt(gradInput.value) || 128;
 
-    // 3. 儲存各分類目標
     const categories = Object.keys(categoryTargets);
     categories.forEach(cat => {
         const target = categoryTargets[cat];
@@ -1003,10 +913,9 @@ function saveCreditSettings() {
         }
     });
     
-    saveData(); // 存檔 (會觸發 refreshUI)
-    toggleCreditEdit(); // 切回檢視模式
+    saveData();
+    toggleCreditEdit();
     showAlert("設定已更新！", "成功");
     
-    // 更新成績輸入視窗的下拉選單
     if (typeof updateGradeCategoryOptions === 'function') updateGradeCategoryOptions();
 }

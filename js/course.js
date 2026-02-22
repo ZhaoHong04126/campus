@@ -1,5 +1,31 @@
-// [新增] 用來記錄「目前正在編輯的一整組連堂課程」的索引列表
+// 用來記錄「目前正在編輯的一整組連堂課程」的索引列表
 let editingCourseIndices = [];
+// 紀錄週課表是否處於編輯模式
+let isWeeklyEditMode = false;
+
+// 切換編輯/唯讀模式的邏輯
+function toggleWeeklyEditMode() {
+    isWeeklyEditMode = !isWeeklyEditMode;
+    const btn = document.getElementById('btn-toggle-sch-edit');
+    if (!btn) return;
+
+    if (isWeeklyEditMode) {
+        btn.innerHTML = "✏️ 編輯模式";
+        btn.style.color = "var(--primary)";
+        btn.style.borderColor = "var(--primary)";
+        btn.style.background = "#e6f0ff";
+        showAlert("已開啟編輯模式！\n現在可以點選格子來新增或修改課程了。");
+    } else {
+        btn.innerHTML = "🔒 唯讀模式";
+        btn.style.color = "#888";
+        btn.style.borderColor = "#ddd";
+        btn.style.background = "transparent";
+        
+        clearSelectionHighlight();
+        selectionAnchor = null;
+        hideSelectionHint();
+    }
+}
 
 // 預設的節次時間對照表
 const defaultPeriodTimes = {
@@ -42,7 +68,6 @@ function switchDay(day) {
                 else if (nature === '選修') typeColor = "#27ae60";
                 else if (nature === '必選修') typeColor = "#f39c12";
 
-                // [修改] 如果有自訂顏色，加上左側邊框顯示
                 const customColor = item.color && item.color !== '#ffffff' ? item.color : 'transparent';
                 const rowStyle = customColor !== 'transparent' ? `border-left: 5px solid ${customColor};` : '';
 
@@ -83,7 +108,7 @@ function renderEditList() {
     listDiv.innerHTML = html || '<p style="color:#999; text-align:center;">無課程</p>';
 }
 
-// [重點修改] 編輯課程 (包含顏色回填邏輯)
+// 編輯課程 (包含顏色回填邏輯)
 function editCourse(startIndex) {
     const todayData = weeklySchedule[currentDay] || [];
     const startItem = todayData[startIndex];
@@ -117,10 +142,9 @@ function editCourse(startIndex) {
     document.getElementById('input-room').value = startItem.room || '';
     document.getElementById('input-teacher').value = startItem.teacher || '';
 
-    // [修改] 顏色回填邏輯 (處理圓點顯示)
     const color = startItem.color || '#ffffff';
-    document.getElementById('input-color').value = color; // 填入 hidden input
-    updateColorSwatchUI(color); // 更新 UI
+    document.getElementById('input-color').value = color;
+    updateColorSwatchUI(color);
 
     const btn = document.getElementById('btn-add-course');
     if (btn) {
@@ -129,14 +153,11 @@ function editCourse(startIndex) {
     }
 }
 
-// [新增] 更新顏色按鈕的選取狀態
+// 更新顏色按鈕的選取狀態
 function updateColorSwatchUI(selectedColor) {
     const swatches = document.querySelectorAll('.color-swatch');
     swatches.forEach(sw => {
         sw.classList.remove('selected');
-        // 取得該 div 的背景顏色設定 (需要將 hex 轉為比較用的格式，或是直接存 hex)
-        // 簡單作法：透過 onclick 觸發的 selectColor 已經處理了，這裡是回填時用
-        // 因為 inline style 可能包含空格，我們直接用 onclick 屬性裡的 hex 來比對最準確
         const onclickAttr = sw.getAttribute('onclick');
         if (onclickAttr && onclickAttr.includes(`'${selectedColor}'`)) {
             sw.classList.add('selected');
@@ -201,7 +222,6 @@ function addCourse() {
     const sub = document.getElementById('input-subject').value;
     const room = document.getElementById('input-room').value;
     const teacher = document.getElementById('input-teacher').value;
-    // 這裡直接讀取 hidden input 的值
     const color = document.getElementById('input-color').value;
 
     if (!sub || !pStartRaw) {
@@ -260,8 +280,6 @@ function resetCourseInput() {
     document.getElementById('input-subject').value = '';
     document.getElementById('input-room').value = '';
     document.getElementById('input-teacher').value = '';
-    
-    // [修改] 重置顏色為白色，並更新 UI
     document.getElementById('input-color').value = '#ffffff';
     updateColorSwatchUI('#ffffff');
 
@@ -328,6 +346,11 @@ function closeEditModal() {
 let selectionAnchor = null;
 
 function handleWeeklyAdd(day, period) {
+    if (!isWeeklyEditMode) {
+        showAlert("目前為「🔒 唯讀模式」\n若要新增課程，請先點擊右上角的按鈕切換至編輯狀態。");
+        return;
+    }
+
     if (!selectionAnchor || selectionAnchor.day !== day) {
         clearSelectionHighlight();
         selectionAnchor = { day: day, period: period };
@@ -366,6 +389,11 @@ function handleWeeklyAdd(day, period) {
 }
 
 function handleWeeklyEdit(day, index) {
+    if (!isWeeklyEditMode) {
+        showAlert("目前為「🔒 唯讀模式」\n若要修改或刪除課程，請先點擊右上角的按鈕切換至編輯狀態。");
+        return;
+    }
+    
     clearSelectionHighlight();
     selectionAnchor = null;
     hideSelectionHint();
@@ -451,7 +479,6 @@ function renderWeeklyTable() {
                     }
                 }
 
-                // [修改] 優先使用自訂顏色，若無則使用預設
                 let bgColor = course.color && course.color !== '#ffffff' ? course.color : null;
                 if (!bgColor) {
                     bgColor = '#fff3e0'; 

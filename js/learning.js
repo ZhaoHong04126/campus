@@ -3,7 +3,6 @@ function renderLearning() {
     const listDiv = document.getElementById('learning-list');
     if (!listDiv) return;
 
-    // 若無目標顯示預設提示
     if (learningList.length === 0) {
         listDiv.innerHTML = `
             <div style="text-align:center; padding:30px; color:#999;">
@@ -17,10 +16,8 @@ function renderLearning() {
     learningList.forEach((item, index) => {
         const current = parseFloat(item.current) || 0;
         const total = parseFloat(item.total) || 1;
-        // 計算百分比
         let percent = Math.min(Math.round((current / total) * 100), 100);
         
-        // 進度顏色：完成=綠, 落後=紅, 進行中=橘 (這裡簡單邏輯：<30紅, >=100綠)
         let color = '#f39c12';
         if (percent >= 100) color = '#2ecc71';
         else if (percent < 30) color = '#e74c3c';
@@ -56,10 +53,10 @@ function renderLearning() {
 function updateLearningProgress(index, delta) {
     const item = learningList[index];
     let newVal = (parseFloat(item.current) || 0) + delta;
-    if (newVal < 0) newVal = 0; // 防止負數
+    if (newVal < 0) newVal = 0;
     item.current = newVal;
-    saveData();//存檔
-    renderLearning();//渲染畫面
+    saveData();
+    renderLearning();
 }
 
 // 新增任務

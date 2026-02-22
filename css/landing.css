@@ -105,8 +105,6 @@
     box-shadow: 0 15px 30px rgba(74, 144, 226, 0.4);
 }
 
-/* --- Hero Image & Animation --- */
-
 .hero-image-container {
     flex: 1;
     display: flex;
@@ -114,7 +112,6 @@
     position: relative;
 }
 
-/* 背景裝飾圓形 */
 .hero-circle-bg {
     position: absolute;
     width: 450px;
@@ -175,8 +172,6 @@
     100% { transform: translate(-50%, -50%) scale(0.9); }
 }
 
-/* --- RWD 手機版適配 --- */
-
 @media (max-width: 900px) {
     .landing-hero {
         display: flex;
@@ -218,7 +213,6 @@
     .hero-title { font-size: 2rem; }
 }
 
-/* 功能特色介紹區塊 */
 .features-section {
     padding: 80px 20px;
     background: white;
